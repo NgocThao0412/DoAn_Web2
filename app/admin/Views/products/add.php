@@ -45,7 +45,7 @@
         <select class="select" name="category_id" id="category_id" required>
             <option value="" selected disabled>-- Chọn loại sản phẩm --</option>
             <?php
-           
+            // Kết nối database ngay tại đây hoặc dùng biến $conn đã include ở đầu trang
             include_once '../../config/data_connect.php'; 
             
             $sql_cat = "SELECT * FROM category WHERE status = 1 ORDER BY name ASC";
