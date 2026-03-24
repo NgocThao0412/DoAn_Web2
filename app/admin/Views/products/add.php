@@ -85,6 +85,13 @@
             </div>
         </div>
 
+        <div class="stock">
+            <div class="product-head">Số lượng ban đầu</div>
+            <div class="product-items">
+                <input type="number" name="current_stock" id="current_stock" min="0" required>
+            </div>
+        </div>
+
     </div>
     
     <div class="items-pic-3">

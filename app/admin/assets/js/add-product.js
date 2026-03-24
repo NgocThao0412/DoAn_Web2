@@ -76,21 +76,17 @@ document.addEventListener('DOMContentLoaded', function() {
         let status = document.getElementById("status").value.trim();
         let category = document.getElementById("category_id").value.trim();
         let unit = document.getElementById("unit").value.trim();
+        let stock = document.getElementById("current_stock").value.trim();
         let imagePath = document.getElementById("filePath").value.trim();
         let profit = document.getElementById("profit_percent").value.trim();
         let description = document.getElementById("description").value.trim();
-       // Kiểm tra giá trị của giá trị đã nhập (Phải >= 0)
-if (parseFloat(price) < 0) {
-    alert("⚠️ Giá không được nhỏ hơn 0");
+        // Kiểm tra giá trị của giá trị đã nhập
+       if (parseFloat(price) <= 0) {
+    alert("⚠️ Giá phải lớn hơn 0");
     isSubmitting = false;
     return;
 }
-
-if (parseFloat(profit) < 0) {
-    alert("⚠️ Lợi nhuận không được nhỏ hơn 0");
-    isSubmitting = false;
-    return;
-}      
+        
         // In ra console để debug
         console.log("📌 Dữ liệu nhập vào:");
         console.log("🛒 Tên:", name);
@@ -117,6 +113,7 @@ if (parseFloat(profit) < 0) {
         formData.append("status", status);
         formData.append("category_id", category);
         formData.append("unit", unit);
+        formData.append("current_stock", stock);
         formData.append("profit_percent", profit);
         formData.append("description", description);
         formData.append("image", document.getElementById("filePath").value);
