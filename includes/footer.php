@@ -17,9 +17,9 @@ echo '
         <div class="footer_section ">
             <h3 class="Footer_footer_title ">THỰC ĐƠN</h3>
             <ul>
-            <a href="macaron"><li><button class="Foot_footer_list ">Macaron</button></li></a>
+            <a href="Macaron"><li><button class="Foot_footer_list ">Macaron</button></li></a>
             <a href="croissant"><li><button class="Foot_footer_list ">Bánh Sừng Bò</button></li></a>
-            <a href="drink"><li><button class="Foot_footer_list ">Đồ Uống</button></li></a>
+            <a href="Drink"><li><button class="Foot_footer_list ">Đồ Uống</button></li></a>
             </ul>
         </div>
         <div class="footer_section ">
