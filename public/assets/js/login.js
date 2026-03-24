@@ -1,167 +1,130 @@
 document.addEventListener("DOMContentLoaded", function () {
+
     const citySelect = document.getElementById("registerCity");
-    const districtSelect = document.getElementById("registerDistrict");
     const wardSelect = document.getElementById("registerWard");
-    const form = document.getElementById('registerForm');
-    
+    const form = document.getElementById("registerForm");
+
+    if (!form) return;
+
     const cityNameHidden = document.getElementById("city_name");
-    const districtNameHidden = document.getElementById("district_name");
     const wardNameHidden = document.getElementById("ward_name");
 
-    if (citySelect && districtSelect && wardSelect) {
-        // Lấy danh sách thành phố
-        fetch("https://provinces.open-api.vn/api/p/")
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(city => {
-                    let option = new Option(city.name, city.code);
-                    option.dataset.name = city.name; // Sử dụng dataset
-                    citySelect.add(option);
-                });
-            })
-            .catch(error => console.error("Error fetching cities:", error));
-
-        // Khi chọn thành phố
-        citySelect.addEventListener("change", function () {
-            const selectedCity = citySelect.options[citySelect.selectedIndex];
-            const cityCode = citySelect.value;
-            cityNameHidden.value = selectedCity?.dataset.name || selectedCity?.text || "";
-            
-            districtSelect.innerHTML = "<option value=''>Select District</option>";
-            wardSelect.innerHTML = "<option value=''>Select Ward</option>";
-            
-            if (cityCode) {
-                fetch(`https://provinces.open-api.vn/api/p/${cityCode}?depth=2`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.districts.forEach(district => {
-                            let option = new Option(district.name, district.code);
-                            option.dataset.name = district.name;
-                            districtSelect.add(option);
-                        });
-                    })
-                    .catch(error => console.error("Error fetching districts:", error));
-            }
-        });
-
-        // Khi chọn quận/huyện
-        districtSelect.addEventListener("change", function () {
-            const selectedDistrict = districtSelect.options[districtSelect.selectedIndex];
-            const districtCode = districtSelect.value;
-            districtNameHidden.value = selectedDistrict?.dataset.name || selectedDistrict?.text || "";
-
-            wardSelect.innerHTML = "<option value=''>Select Ward</option>";
-            
-            if (districtCode) {
-                fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.wards.forEach(ward => {
-                            let option = new Option(ward.name, ward.code);
-                            option.dataset.name = ward.name;
-                            wardSelect.add(option);
-                        });
-                    })
-                    .catch(error => console.error("Error fetching wards:", error));
-            }
-        });
-
-        // Khi chọn phường/xã
-        wardSelect.addEventListener("change", function () {
-            const selectedWard = wardSelect.options[wardSelect.selectedIndex];
-            wardNameHidden.value = selectedWard?.dataset.name || selectedWard?.text || "";
-        });
-
-        // Xử lý submit form
-        if (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-
-                const loginUserNameInput = document.getElementById('loginUserName');
-                
-                // Regex kiểm tra URL chặt chẽ hơn
-                const urlPattern = /\b((http|https):\/\/|www\.)[^\s]+|[^\s]+\.(com|net|org|vn|info|biz|edu)(\b|\/)/i;
-
-                const usernameValue = loginUserNameInput?.value?.trim().toLowerCase() || "";
-
-                if (loginUserNameInput && urlPattern.test(usernameValue)) {
-                    alert('Links are not allowed in the username field. Please remove any URLs before proceeding.');
-                    loginUserNameInput.focus();
-                    return; // DỪNG tại đây
-                }
-
-                // Cập nhật hidden inputs
-                const selectedCity = citySelect.options[citySelect.selectedIndex];
-                const selectedDistrict = districtSelect.options[districtSelect.selectedIndex];
-                const selectedWard = wardSelect.options[wardSelect.selectedIndex];
-
-                cityNameHidden.value = selectedCity?.dataset.name || selectedCity?.text || "";
-                districtNameHidden.value = selectedDistrict?.dataset.name || selectedDistrict?.text || "";
-                wardNameHidden.value = selectedWard?.dataset.name || selectedWard?.text || "";
-
-                // Gửi form
-                const formData = new FormData(form);
-                fetch('pages/Controllers/register_process.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        window.location.href = 'login';
-                    } else {
-                        alert('An error occurred:\n' + data.errors.join('\n'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error submitting form:', error);
-                    alert('An unknown error occurred.');
-                });
+    // ==============================
+    // LOAD TỈNH
+    // ==============================
+    fetch("includes/getProvinces.php")
+        .then(res => res.json())
+        .then(data => {
+            citySelect.innerHTML = "<option value=''>Chọn Tỉnh / Thành phố</option>";
+            data.forEach(city => {
+                const option = new Option(city.provinceName, city.provinceID);
+                citySelect.add(option);
             });
+        })
+        .catch(err => {
+            console.error("Lỗi tải tỉnh:", err);
+        });
 
-        }
-    }
+    // ==============================
+    // LOAD PHƯỜNG
+    // ==============================
+    citySelect.addEventListener("change", function () {
+        const provinceID = citySelect.value;
 
-    // Xử lý thông báo lỗi từ query string nếu có
-    const params = new URLSearchParams(window.location.search);
-    const error = params.get('error');
-    if (error) {
-        let message = '';
-        switch (error) {
-            case 'role_not_allowed':
-                message = 'Your account does not have permission to access this area.';
-                break;
-            case 'wrong_password':
-                message = 'Incorrect password. Please try again.';
-                break;
-            case 'user_not_found':
-                message = 'No account found with this username.';
-                break;
-            case 'account_locked':
-                message = 'Your account has been locked. Please contact the administrator.';
-                break;
-            case 'method_not_allowed':
-                message = 'Invalid submission method.';
-                break;
-            default:
-                message = 'An unknown error occurred.';
-        }
-        if (message) {
-            alert(message);
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-        }
-    }
-});
+        cityNameHidden.value = citySelect.options[citySelect.selectedIndex]?.text || "";
 
-// Hiệu ứng cho input
-document.querySelectorAll(".input-box input").forEach((input) => {
-    input.addEventListener("input", function () {
-        if (this.validity.valid || this.value.trim() !== "") {
-            this.classList.add("has-content");
-        } else {
-            this.classList.remove("has-content");
+        wardSelect.innerHTML = "<option value=''>Chọn Phường / Xã</option>";
+        wardNameHidden.value = "";
+
+        if (provinceID) {
+            fetch(`includes/getWard.php?provinceID=${provinceID}`)
+                .then(res => res.json())
+                .then(wards => {
+                    wards.forEach(ward => {
+                        const option = new Option(ward.wardName, ward.wardID);
+                        wardSelect.add(option);
+                    });
+                })
+                .catch(err => {
+                    console.error("Lỗi tải phường:", err);
+                });
         }
     });
+
+    wardSelect.addEventListener("change", function () {
+        wardNameHidden.value = wardSelect.options[wardSelect.selectedIndex]?.text || "";
+    });
+
+    // ==============================
+    // SUBMIT FORM
+    // ==============================
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Xóa lỗi cũ
+        document.querySelectorAll(".error").forEach(e => e.innerText = "");
+
+        const usernameInput = document.getElementById("registerUsername");
+        const usernameValue = usernameInput?.value?.trim() || "";
+
+        // Check username chứa link
+        const urlPattern = /\b((http|https):\/\/|www\.)[^\s]+|[^\s]+\.(com|net|org|vn|info|biz|edu)(\b|\/)/i;
+        if (urlPattern.test(usernameValue)) {
+            document.getElementById("error-username").innerText = "Tên đăng nhập không được chứa liên kết.";
+            usernameInput.focus();
+            return;
+        }
+
+        // Gán tên tỉnh/xã
+        cityNameHidden.value = citySelect.options[citySelect.selectedIndex]?.text || "";
+        wardNameHidden.value = wardSelect.options[wardSelect.selectedIndex]?.text || "";
+
+        const formData = new FormData(form);
+
+        fetch("pages/Controllers/register_process.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text()) // 🔥 dùng text để debug an toàn
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = "login";
+                } else {
+                    // Hiển thị lỗi dưới từng input
+                    for (let field in data.errors) {
+                        const errorDiv = document.getElementById("error-" + field);
+                        if (errorDiv) {
+                            errorDiv.innerText = data.errors[field];
+                        }
+                    }
+                }
+
+            } catch (err) {
+                console.error("LỖI JSON:", text); // 🔥 in ra lỗi PHP thật
+                alert("Server đang lỗi, xem console!");
+            }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Không thể kết nối server.");
+        });
+    });
+
+    // ==============================
+    // HIỆU ỨNG INPUT
+    // ==============================
+    document.querySelectorAll(".input-box input").forEach(input => {
+        input.addEventListener("input", function () {
+            if (this.value.trim() !== "") {
+                this.classList.add("has-content");
+            } else {
+                this.classList.remove("has-content");
+            }
+        });
+    });
+
 });

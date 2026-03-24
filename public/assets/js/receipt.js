@@ -4,36 +4,51 @@ document.addEventListener("DOMContentLoaded", function () {
     const blurOverlay = document.querySelector('.blur-overlay');
 
     viewMoreBtns.forEach(item => {
-        item.addEventListener('click', function(){
+        item.addEventListener('click', function () {
+
             const orderId = this.getAttribute('data-order-id');
-            fetch(`pages/receipt-detail.php?order_id=${orderId}`)
+            console.log("CLICK ORDER:", orderId);
+
+            fetch(`/banhang/pages/receipt-detail.php?order_id=${orderId}`)
                 .then(response => response.text())
                 .then(data => {
-                    // Thay vì innerHTML
+
+                    console.log("SERVER RETURN:", data); 
                     moreInforContent.innerHTML = '';
                     moreInforContent.insertAdjacentHTML('beforeend', data);
-                    
+
                     const moreInfor = moreInforContent.querySelector('.more-infor');
+
+                    if (!moreInfor) {
+                        console.error("Không tìm thấy .more-infor → PHP lỗi hoặc không trả HTML đúng");
+                        return;
+                    }
+
                     blurOverlay.classList.add('active');
-                    
-                    // Lồng hai lần requestAnimationFrame để đảm bảo render kịp:
+
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             moreInfor.classList.add('active');
                         });
-                    });                       
+                    });
 
                     const iconClose = moreInfor.querySelector('.icon-close');
-                    iconClose.addEventListener('click', function(){
-                        moreInfor.classList.remove('active');
 
-                        moreInfor.addEventListener('transitionend', () => {
-                            blurOverlay.classList.remove('active');
-                            moreInforContent.innerHTML = "";
-                        }, { once: true });
-                    });
+                    if (iconClose) {
+                        iconClose.addEventListener('click', function () {
+                            moreInfor.classList.remove('active');
+
+                            moreInfor.addEventListener('transitionend', () => {
+                                blurOverlay.classList.remove('active');
+                                moreInforContent.innerHTML = "";
+                            }, { once: true });
+                        });
+                    }
+
                 })
-                .catch(error => console.error('Error loading order details:', error));
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
         });
     });
 });

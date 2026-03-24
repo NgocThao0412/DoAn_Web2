@@ -1,12 +1,13 @@
 <?php
 session_name("user");
 session_start();
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 include "../app/config/data_connect.php"; // Kết nối database
 
 header("Content-Type: application/json");
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
+error_reporting(0);
+ini_set('display_errors', 0);
+$username = $_SESSION['user']['username'];
 // Kiểm tra đăng nhập
 if (
     !isset($_SESSION['user']) || 
@@ -20,7 +21,7 @@ if (
     exit;
 }
 
-$username = $_SESSION['user']['username'];
+$user_id = $_SESSION['user']['user_id'];
 $role = $_SESSION['user']['role'];
 $order_date = date('Y-m-d H:i:s');
 
@@ -28,7 +29,6 @@ $order_date = date('Y-m-d H:i:s');
 $fullname = mysqli_real_escape_string($conn, $_POST['full_name'] ?? '');
 $phone = mysqli_real_escape_string($conn, $_POST['phone'] ?? '');
 $shipping_city = mysqli_real_escape_string($conn, $_POST['shipping_city_name'] ?? '');
-$shipping_district = mysqli_real_escape_string($conn, $_POST['shipping_district_name'] ?? '');
 $shipping_ward = mysqli_real_escape_string($conn, $_POST['shipping_ward_name'] ?? '');
 $shipping_street = mysqli_real_escape_string($conn, $_POST['shipping_street'] ?? '');
 $delivery_date = mysqli_real_escape_string($conn, $_POST['delivery_date'] ?? '');
@@ -53,7 +53,14 @@ if ($delivery_time_raw) {
         $formatted_time = null;
     }
 } else {
-    $formatted_time = null;
+    $formatted_time = "00:00:00";
+
+if (!empty($_POST['delivery_time'])) {
+    $parts = explode(':', $_POST['delivery_time']);
+    if (count($parts) >= 2) {
+        $formatted_time = sprintf("%02d:%02d:00", $parts[0], $parts[1]);
+    }
+}
 }
 
 
@@ -62,20 +69,19 @@ $note = mysqli_real_escape_string($conn, $_POST['note'] ?? '');
 
 
 // Kiểm tra hợp lệ phương thức thanh toán
-$valid_methods = ['COD'];
-$payment_method = strtoupper($_POST['payment_method'] ?? 'COD');
-if (!in_array($payment_method, $valid_methods)) {
-    $payment_method = 'COD';
-}
-
+$payment_status = 'UNPAID'; // mặc định chưa thanh toán
 
 // Tính tổng tiền đơn hàng
 $cart_query = mysqli_query($conn, "
-    SELECT c.*, p.price 
-    FROM cart c 
-    JOIN product p ON c.product_id = p.product_id 
-    WHERE c.user_name = '$username'
-") or die(json_encode(["success" => false, "message" => "Cart query error!"]));
+    SELECT cd.cart_id, cd.product_id, cd.quantity, p.selling_price AS price
+    FROM cart_detail cd
+    JOIN cart c ON cd.cart_id = c.cart_id
+    JOIN products p ON cd.product_id = p.product_id
+    WHERE c.user_id = $user_id AND c.status = 'active'
+") or die(json_encode([
+    "success" => false,
+    "message" => "Cart query error: " . mysqli_error($conn)
+]));
 
 
 $total_cost = 0;
@@ -95,41 +101,93 @@ if (empty($cart_items)) {
     exit;
 }
 
-// Tạo đơn hàng
-$stmt = $conn->prepare("INSERT INTO orders (user_name, recipient_name, recipient_phone, order_date, delivery_date, delivery_time, total_cost, payment_method, notes, shipping_city, shipping_district, shipping_ward, shipping_street) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("ssssssdssssss", $username, $fullname, $phone, $order_date, $delivery_date, $formatted_time, $total_cost, $payment_method, $note, $shipping_city, $shipping_district, $shipping_ward, $shipping_street);
+$payment_status = 'UNPAID';
+$order_status = 'PENDING';
+
+$stmt = $conn->prepare("
+INSERT INTO orders (
+    username,
+    user_id,
+    recipient_name,
+    recipient_phone,
+    total_amount,
+    payment_status,
+    order_status,
+    order_date,
+    delivery_date,
+    delivery_time,
+    notes,
+    shipping_city,
+    shipping_ward,
+    shipping_street
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
+
+$stmt->bind_param(
+    "sissdsssssssss",
+    $username,
+    $user_id,
+    $fullname,
+    $phone,
+    $total_cost,
+    $payment_status,
+    $order_status,
+    $order_date,
+    $delivery_date,
+    $formatted_time,
+    $note,
+    $shipping_city,
+    $shipping_ward,
+    $shipping_street
+);
 
 if (!$stmt->execute()) {
-    echo json_encode(["success" => false, "message" => "Error creating order: " . $stmt->error]);
+    echo json_encode([
+        "success" => false,
+        "message" => "Error creating order: " . $stmt->error
+    ]);
     exit;
 }
 
-// Lấy order_id tự động tăng từ cơ sở dữ liệu
-$order_id = $stmt->insert_id;  // Chú ý: Đây sẽ lấy giá trị `order_id` mới nhất được chèn
+$order_id = $stmt->insert_id;
 $stmt->close();
 
 $_SESSION['last_order_id'] = $order_id; // Lưu ID đơn hàng vào session để dùng cho get_last_order_items.php
 
 // Tiến hành thêm chi tiết đơn hàng như trước
+
+   $stmt = $conn->prepare("
+    INSERT INTO order_detail (order_id, product_id, quantity, price, unit)
+    VALUES (?, ?, ?, ?, ?)
+");
+
 foreach ($cart_items as $item) {
+
     $product_id = $item['product_id'];
     $quantity = $item['quantity'];
     $price = $item['price'];
-    // Lấy ghi chú cho sản phẩm từ $_POST['product_note'][$cart_id]
-    $product_note = isset($_POST['product_note'][$item['cart_id']]) ? mysqli_real_escape_string($conn, $_POST['product_note'][$item['cart_id']]) : '';
 
-    // Thực hiện câu lệnh INSERT vào bảng order_detail
-    mysqli_query($conn, "
-        INSERT INTO order_detail (order_id, product_id, quantity, price, note) 
-        VALUES ('$order_id', '$product_id', '$quantity', '$price', '$product_note')
+    $unit_query = mysqli_query($conn, "
+        SELECT unit FROM products WHERE product_id = $product_id
     ");
+    $unit_row = mysqli_fetch_assoc($unit_query);
+    $unit = $unit_row['unit'] ?? null;
+
+    $stmt->bind_param("iiids", $order_id, $product_id, $quantity, $price, $unit);
+    $stmt->execute();
 }
 
+$stmt->close();
 
+mysqli_query($conn, "
+    DELETE cd FROM cart_detail cd
+    JOIN cart c ON cd.cart_id = c.cart_id
+    WHERE c.user_id = $user_id
+");
 
 // Xóa giỏ hàng sau khi đặt hàng thành công
-$stmt = $conn->prepare("DELETE FROM cart WHERE user_name = ?");
-$stmt->bind_param("s", $username);
+$stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 $stmt->close();
 

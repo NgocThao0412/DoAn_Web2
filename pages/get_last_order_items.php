@@ -1,30 +1,22 @@
 <?php
-session_name("user");
-session_start();
 header('Content-Type: application/json');
-
 include('../app/config/data_connect.php');
 
-if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
-    exit();
-}
-
-if (!isset($_SESSION['last_order_id'])) {
+if (!isset($_GET['order_id'])) {
     echo json_encode([]);
     exit();
 }
 
-$order_id = $_SESSION['last_order_id'];
+$order_id = intval($_GET['order_id']);
 
 $sql = "SELECT 
-            p.product_name, 
+            p.name, 
             od.quantity, 
             od.price,
             o.recipient_name,
-            CONCAT(o.shipping_street, ', ', o.shipping_ward, ', ', o.shipping_district, ', ', o.shipping_city) AS receive_address
+            CONCAT(o.shipping_street, ', ', o.shipping_ward, ', ', o.shipping_city) AS receive_address
         FROM order_detail od
-        JOIN product p ON od.product_id = p.product_id
+        JOIN products p ON od.product_id = p.product_id
         JOIN orders o ON od.order_id = o.order_id
         WHERE od.order_id = ?";
 
@@ -36,7 +28,7 @@ $result = $stmt->get_result();
 $items = [];
 while ($row = $result->fetch_assoc()) {
     $items[] = [
-        'product_name' => $row['product_name'],
+        'product_name' => $row['name'],
         'quantity' => $row['quantity'],
         'price' => $row['price'],
         'receive_address' => $row['receive_address'],

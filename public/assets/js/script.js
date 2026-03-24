@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         shoppingCart.classList.add("active");
                         if (blurOverlay) blurOverlay.classList.add("active");
                     } else {
-                        alert("You need to log in to view the cart!");
+                        alert("Bạn cần đăng nhập để xem giỏ hàng");
                         window.location.href = "login";
                     }
                 });
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
             event.stopPropagation();
             checkLoginStatus((isLoggedIn) => {
                 if (!isLoggedIn) {
-                    alert("You need to log in to add products to the cart!");
+                    alert("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
                     window.location.href = "login";
                 } else {
                     let productId = this.getAttribute("data-id");
@@ -369,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
     payLink.addEventListener("click", function(event) {
         if (payButton.hasAttribute("disabled")) {
             event.preventDefault(); // Ngăn chặn chuyển trang
-            alert("Your cart is empty. Please add products before proceeding to checkout!");
+            alert("Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi tiến hành thanh toán!");
         }
     });
     
