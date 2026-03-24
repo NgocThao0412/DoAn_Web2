@@ -148,26 +148,30 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
 // Luôn hiển thị search container, bất kể page=advance hay home
 ?>
 <div class="products-search-container" id="search-container">
-    <form method="GET" action="index.php" class="search-form">
-        <input type="hidden" name="page" value="advance">
-        <input 
-            type="text" 
-            class="search-input" 
-            name="searchName" 
-            value="<?= htmlspecialchars($term) ?>" 
-            placeholder="Nhập tên sản phẩm..."
-        >
-        <span class="search-icon0">
-            <button class="searchBtn" type="submit">
-            </button>
-        </span>
-    </form>
-    
-    <button id="toggle-search-fields" type="button">TÌM KIẾM NÂNG CAO</button>
+    <div class="search-wrapper">
+        <form method="GET" action="index.php" class="search-form" id="main-search-form">
+            <input type="hidden" name="page" value="home">
+            <div class="input-wrapper">
+                <input 
+                    id="header-search-input"
+                    type="text" 
+                    class="search-input" 
+                    name="searchName" 
+                    value="<?= htmlspecialchars($term) ?>"
+                    placeholder="Tìm sản phẩm..."
+                >
+                <button type="submit" class="filter-submit-btn">
+                    <ion-icon name="search-outline"></ion-icon>
+                </button>
+            </div>
+        </form>
+        
+        <button id="toggle-search-fields" type="button">TÌM KIẾM NÂNG CAO</button>
+    </div>
     
     <div id="advanced-filters" style="display: none; width: 100%;">
-        <form method="GET" action="index.php" class="filters-form">
-            <input type="hidden" name="page" value="advance">
+        <form method="GET" action="index.php" class="filters-form" id="filters-form">
+            <input type="hidden" name="page" value="home">
             <input type="hidden" name="searchName" value="<?= htmlspecialchars($term) ?>">
             
             <select name="searchCategory" class="search-criteria">
@@ -182,8 +186,6 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
             
             <input type="number" min="0" name="maxPrice" class="search-criteria" 
                    value="<?= htmlspecialchars($maxPrice) ?>" placeholder="Giá đến">
-            
-            <button type="submit" class="filter-submit-btn">Tìm kiếm</button>
         </form>
     </div>
 </div>
@@ -192,17 +194,69 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
     document.addEventListener('DOMContentLoaded', function () {
         var toggleBtn = document.getElementById('toggle-search-fields');
         var advancedFilters = document.getElementById('advanced-filters');
+        var mainSearchForm = document.getElementById('main-search-form');
+        var filtersForm = document.getElementById('filters-form');
         
+        // Toggle advanced filters visibility
         if (toggleBtn && advancedFilters) {
             toggleBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 if (advancedFilters.style.display === 'none') {
                     advancedFilters.style.display = 'block';
-                    toggleBtn.textContent = 'Ẩn tìm kiếm nâng cao';
+                    toggleBtn.textContent = 'ẨN TÌM KIẾM NÂNG CAO';
                 } else {
                     advancedFilters.style.display = 'none';
                     toggleBtn.textContent = 'TÌM KIẾM NÂNG CAO';
                 }
+            });
+        }
+        
+        // Connect search button with advanced filters
+        if (mainSearchForm && filtersForm) {
+            mainSearchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get filter values
+                var category = filtersForm.querySelector('[name="searchCategory"]').value;
+                var minPrice = filtersForm.querySelector('[name="minPrice"]').value;
+                var maxPrice = filtersForm.querySelector('[name="maxPrice"]').value;
+                
+                // Add to main form
+                var mainForm = this;
+                
+                // Remove old filter fields if exist
+                mainForm.querySelectorAll('[data-filter="true"]').forEach(el => el.remove());
+                
+                // Add filter fields
+                if (category && category !== 'all') {
+                    var catInput = document.createElement('input');
+                    catInput.type = 'hidden';
+                    catInput.name = 'searchCategory';
+                    catInput.value = category;
+                    catInput.setAttribute('data-filter', 'true');
+                    mainForm.appendChild(catInput);
+                }
+                
+                if (minPrice) {
+                    var minInput = document.createElement('input');
+                    minInput.type = 'hidden';
+                    minInput.name = 'minPrice';
+                    minInput.value = minPrice;
+                    minInput.setAttribute('data-filter', 'true');
+                    mainForm.appendChild(minInput);
+                }
+                
+                if (maxPrice) {
+                    var maxInput = document.createElement('input');
+                    maxInput.type = 'hidden';
+                    maxInput.name = 'maxPrice';
+                    maxInput.value = maxPrice;
+                    maxInput.setAttribute('data-filter', 'true');
+                    mainForm.appendChild(maxInput);
+                }
+                
+                // Submit
+                mainForm.submit();
             });
         }
     });
@@ -288,10 +342,9 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <p>Không có sản phẩm nào phù hợp.</p>
+            <p class="no-result-message">Không có sản phẩm nào phù hợp.</p>
         <?php endif; ?>
     </div>
-
     <!-- Phân trang -->
     <div class="container">
     <div class="pagination">
@@ -325,4 +378,3 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
 </div>
 </div>
 
-<p id="no-result-message" style="display:none; text-align:center; color:#999;">Không có sản phẩm nào phù hợp.</p>

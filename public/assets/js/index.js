@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch(`http://localhost/webb/pages/getAllProduct.php?term=${encodeURIComponent(searchTerm)}`)
+        fetch(`pages/getAllProduct.php?term=${encodeURIComponent(searchTerm)}`)
            .then(response => response.json())
            .then(products => {
                hintContainer.innerHTML = "";
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      hintItem.addEventListener("click", function () {
                          isSelectingHint = false; // Reset biến
                        console.log(item.product_id);
-                        window.location.href = `/webb/index.php?page=product&id=${item.product_id}`;
+                        window.location.href = `index.php?page=product&id=${item.product_id}`;
                    });                    
 
                   hintContainer.appendChild(hintItem);

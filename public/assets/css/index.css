@@ -144,7 +144,8 @@
 .title {
     font-size: 14px;
     /* margin-left: auto; */
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+    width: auto;
 }
 
 .butn {
@@ -315,8 +316,6 @@
         justify-content: center;
         transition: width 0.5s ease, height 0.5s ease; 
     }
-
-
 
     .title{
         width: 240px;
@@ -655,7 +654,13 @@
         justify-items: center;
         row-gap: 40px;
     }
+    .no-result-message {
+    grid-column: 1 / -1;   /* chiếm toàn bộ grid */
+    font-size: 16px;
+    color: #000;
 
+    white-space: normal;
+    word-break: keep-all;}
     .title{
         font-size: 11px;
         width: 155px;
@@ -736,7 +741,7 @@
     }
 
     .title{
-        width: 155px;
+        width: auto;
         margin-left: 0px;
     }
 
@@ -1060,9 +1065,25 @@
 .nav-links li {
         margin: 0 0.025px !important;     
     }
+    .flex-full .search-summary{
+   font-size: 14px !important;
+   margin-left: -200px !important;
+}
+}
+@media (max-width: 400px) {
+    .flex-full .search-summary{
+   font-size: 14px !important;
+   margin-left: -150px !important;
+
+}
+}
+@media (max-width: 375px) {
+
+     .flex-full .search-summary{
+   font-size: 12px !important;
+   margin-left: -190px !important;
 }
 
-@media (max-width: 375px) {
     .search-input .search-icon button{
         width: 38px;
         height: 38px;
