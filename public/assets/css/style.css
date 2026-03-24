@@ -349,22 +349,27 @@ header.hide {
     background: #cadbfb;
     color: #162938;
 }
-
 .btnLogout-popup {
-    width: 100px;
+    display: inline-flex;          /* dùng flex để canh chữ */
+    align-items: center;
+    justify-content: center;
+
     height: 30px;
+    padding: 0 12px;               /* tăng nhẹ cho vừa chữ */
+    
     background: transparent;
     border: 1px solid #1f1c1c;
-    outline-width: 2px;
-    outline: none;
     border-radius: 10px;
     cursor: pointer;
+
     font-size: 1em;
     color: #000000;
     font-weight: 500;
+
     margin-left: 10px;
-    transition: .5s;
-    padding: 0 10px;
+    transition: 0.3s;
+
+    white-space: nowrap;           /* không xuống dòng */
 }
 
 .btnLogout-popup:hover {

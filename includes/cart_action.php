@@ -1,27 +1,33 @@
 <?php
-session_name("user");
+session_name("user"); // nếu bạn dùng custom name
 session_start();
-include "../app/config/data_connect.php"; // Kết nối database
 
-header("Content-Type: application/json");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Kiểm tra đăng nhập
-if (
-    !isset($_SESSION['user']) || 
-    !isset($_SESSION['user']['username']) || 
-    !isset($_SESSION['user']['role'])
-    
-) {
+include "../app/config/data_connect.php"; // Kết nối database
+
+header("Content-Type: application/json");
+
+// Kiểm tra kết nối database
+if (!$conn) {
     echo json_encode([
         "success" => false,
-        "message" => "Please log in before performing this action."
+        "message" => "Database connection error."
     ]);
     exit;
 }
 
-$username = $_SESSION['user']['username'];
+// Kiểm tra đăng nhập
+if (!isset($_SESSION['user']['user_id'])) {
+    echo json_encode([
+        "success" => false,
+        "message" => "Please login"
+    ]);
+    exit;
+}
+
+$user_id = $_SESSION['user']['user_id'];
 $role = $_SESSION['user']['role'];
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -29,17 +35,17 @@ $action = $data['action'] ?? '';
 
 switch ($action) {
     case "update":
-        updateQuantity($conn, $username, $data);
+        updateQuantity($conn, $user_id, $data);
         break;
     case "remove":
-        removeItem($conn, $username, $data);
+        removeItem($conn, $user_id, $data);
         break;
     case "add":
-        addToCart($conn, $username, $data);
+        addToCart($conn, $user_id, $data);
         break;
     default:
         if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["cart_count"])) {
-            getCartCount($conn, $username);
+            getCartCount($conn, $user_id);
         } else {
             echo json_encode(["success" => false, "message" => "Invalid action."]);
         }
@@ -47,111 +53,118 @@ switch ($action) {
 }
 
 /* 🛒 Thêm sản phẩm vào giỏ hàng */
-function addToCart($conn, $username, $data) {
-    $product_id = $data['product_id'] ?? 0;
+function addToCart($conn, $user_id, $data) {
+    $product_id = intval($data['product_id'] ?? 0);
+
     if (!$product_id) {
-        echo json_encode(["success" => false, "message" => "Missing product_id."]);
+        echo json_encode(["success" => false, "message" => "Missing product_id"]);
         exit;
     }
 
-    $sql_check = "SELECT quantity FROM cart WHERE user_name = ? AND product_id = ?";
-    $stmt_check = $conn->prepare($sql_check);
-    $stmt_check->bind_param("si", $username, $product_id);
-    $stmt_check->execute();
-    $result = $stmt_check->get_result();
+    // lấy cart
+    $stmt_cart = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ? AND status = 'active'");
+    if (!$stmt_cart) {
+        echo json_encode(["success" => false, "message" => $conn->error]);
+        exit;
+    }
 
-    if ($result->num_rows > 0) {
-        $sql_update = "UPDATE cart SET quantity = quantity + 1 WHERE user_name = ? AND product_id = ?";
-        $stmt_update = $conn->prepare($sql_update);
-        $stmt_update->bind_param("si", $username, $product_id);
+    $stmt_cart->bind_param("i", $user_id);
+    $stmt_cart->execute();
+    $res = $stmt_cart->get_result();
+
+    if ($res->num_rows == 0) {
+        $stmt_new = $conn->prepare("INSERT INTO cart (user_id, status) VALUES (?, 'active')");
+        $stmt_new->bind_param("i", $user_id);
+        $stmt_new->execute();
+        $cart_id = $conn->insert_id;
+    } else {
+        $cart_id = $res->fetch_assoc()['cart_id'];
+    }
+
+    // check sản phẩm
+    $stmt = $conn->prepare("SELECT quantity FROM cart_detail WHERE cart_id = ? AND product_id = ?");
+    $stmt->bind_param("ii", $cart_id, $product_id);
+    $stmt->execute();
+    $check = $stmt->get_result();
+
+    if ($check->num_rows > 0) {
+        $stmt_update = $conn->prepare("UPDATE cart_detail SET quantity = quantity + 1 WHERE cart_id = ? AND product_id = ?");
+        $stmt_update->bind_param("ii", $cart_id, $product_id);
         $stmt_update->execute();
     } else {
-        $sql_insert = "INSERT INTO cart (user_name, product_id, quantity) VALUES (?, ?, 1)";
-        $stmt_insert = $conn->prepare($sql_insert);
-        $stmt_insert->bind_param("si", $username, $product_id);
+        $stmt_insert = $conn->prepare("INSERT INTO cart_detail (cart_id, product_id, quantity) VALUES (?, ?, 1)");
+        $stmt_insert->bind_param("ii", $cart_id, $product_id);
         $stmt_insert->execute();
     }
 
-    echo json_encode(["success" => true, "message" => "The product has been added to the cart."]);
+    echo json_encode(["success" => true]);
+    exit;
 }
 
 /* 🔄 Cập nhật số lượng sản phẩm */
-function updateQuantity($conn, $username, $data) {
+function updateQuantity($conn, $user_id, $data) {
     $product_id = $data['product_id'] ?? 0;
     $new_quantity = $data['quantity'] ?? 1;
 
     if (!$product_id || $new_quantity < 1) {
-        echo json_encode(["success" => false, "message" => "Invalid data."]);
+        echo json_encode(["success" => false]);
         exit;
     }
 
-    $sql = "UPDATE cart SET quantity = ? WHERE user_name = ? AND product_id = ?";
+    $sql = "UPDATE cart_detail cd
+            JOIN cart c ON cd.cart_id = c.cart_id
+            SET cd.quantity = ?
+            WHERE c.user_id = ? AND cd.product_id = ? AND c.status = 'active'";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isi", $new_quantity, $username, $product_id);
+    $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
     $stmt->execute();
 
-    echo json_encode(["success" => true, "message" => "Quantity updated successfully."]);
+    echo json_encode(["success" => true]);
 }
 
 /* ❌ Xóa sản phẩm khỏi giỏ hàng */
-function removeItem($conn, $username, $data) {
+function removeItem($conn, $user_id, $data) {
     $product_id = $data['product_id'] ?? 0;
 
     if (!$product_id) {
-        echo json_encode(["success" => false, "message" => "Invalid data."]);
+        echo json_encode(["success" => false]);
         exit;
     }
 
-    $sql = "DELETE FROM cart WHERE user_name = ? AND product_id = ?";
+    $sql = "DELETE cd FROM cart_detail cd
+            JOIN cart c ON cd.cart_id = c.cart_id
+            WHERE c.user_id = ? AND cd.product_id = ? AND c.status = 'active'";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $username, $product_id);
+    $stmt->bind_param("ii", $user_id, $product_id);
     $stmt->execute();
 
-    echo json_encode(["success" => true, "message" => "The product has been deleted."]);
+    echo json_encode(["success" => true]);
 }
-
 /* 🛍️ Lấy số lượng sản phẩm trong giỏ hàng */
 /* 🛍️ Lấy số lượng sản phẩm trong giỏ hàng (CHỈ ĐẾM SẢN PHẨM "AVAILABLE") */
-function getCartCount($conn, $username) {
-    // Bước 1: Xóa các sản phẩm trong giỏ hàng của người dùng này mà không còn "Available"
-    // Giả sử trạng thái hợp lệ là 'Available'
-    $sql_delete_hidden = "DELETE c FROM cart c
-                          JOIN product p ON c.product_id = p.product_id
-                          WHERE c.user_name = ? AND p.status != 'Available'";
-    $stmt_delete = $conn->prepare($sql_delete_hidden);
-    if (!$stmt_delete) {
-        // Không nên echo lỗi ở đây vì sẽ làm hỏng JSON response của getCartCount
-        // Ghi log lỗi server-side
-        error_log("Error preparing delete hidden items query: " . $conn->error);
-        // Trả về count = 0 hoặc một giá trị lỗi nếu muốn client xử lý
-        // echo json_encode(["count" => 0, "error_message" => "Could not verify cart items."]);
-        // exit;
-        // Hoặc bỏ qua bước xóa nếu có lỗi và chỉ đếm những cái hiện có + available
-    } else {
-        $stmt_delete->bind_param("s", $username);
-        $stmt_delete->execute();
-        $stmt_delete->close();
-    }
+function getCartCount($conn, $user_id) {
 
+    $sql = "SELECT SUM(cd.quantity) AS total
+            FROM cart_detail cd
+            JOIN cart c ON cd.cart_id = c.cart_id
+            JOIN products p ON cd.product_id = p.product_id
+            WHERE c.user_id = ? AND p.status = 'AVAILABLE' AND c.status = 'active'";
 
-    // Bước 2: Đếm tổng số lượng các sản phẩm còn lại (và chắc chắn là Available)
-    $sql_count = "SELECT SUM(c.quantity) AS total
-                  FROM cart c
-                  JOIN product p ON c.product_id = p.product_id
-                  WHERE c.user_name = ? AND p.status = 'Available'";
-    $stmt_count = $conn->prepare($sql_count);
-    if (!$stmt_count) {
-        error_log("Error preparing cart count query: " . $conn->error);
-        echo json_encode(["count" => 0, "error_message" => "Could not count cart items."]);
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        echo json_encode(["count" => 0, "error" => $conn->error]);
         exit;
     }
-    $stmt_count->bind_param("s", $username);
-    $stmt_count->execute();
-    $result = $stmt_count->get_result();
-    $row = $result->fetch_assoc();
-    $totalItems = $row['total'] ?? 0;
-    $stmt_count->close();
 
-    echo json_encode(["count" => (int)$totalItems]); // Ép kiểu về int
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    echo json_encode(["count" => (int)($row['total'] ?? 0)]);
     exit;
 }

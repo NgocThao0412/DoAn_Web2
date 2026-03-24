@@ -96,7 +96,8 @@
 
 /* login button */
 .btnLogin-popup {
-    width: 90px;
+    /* display: flex; */
+    width: auto;
     height: 30px;
     background: transparent;
     border: 1px solid #1f1c1c;
@@ -109,6 +110,11 @@
     font-weight: 500;
     margin-left: 40px;
     transition: .5s;
+    padding: 0px 10px;
+
+    /* Giới hạn text */
+    white-space: nowrap; /* Không xuống dòng */
+    display: inline-block; /* Đảm bảo kích thước phù hợp */
 }
 
 .btnLogin-popup:hover {
@@ -117,19 +123,26 @@
 }
 
 .btnLogout-popup {
-    width: 90px;
+    display: inline-flex;          /* dùng flex để canh chữ */
+    align-items: center;
+    justify-content: center;
+
     height: 30px;
+    padding: 0 12px;               /* tăng nhẹ cho vừa chữ */
+    
     background: transparent;
     border: 1px solid #1f1c1c;
-    outline-width: 2px;
-    outline: none;
     border-radius: 10px;
     cursor: pointer;
+
     font-size: 1em;
     color: #000000;
     font-weight: 500;
+
     margin-left: 10px;
-    transition: .5s;
+    transition: 0.3s;
+
+    white-space: nowrap;           /* không xuống dòng */
 }
 
 .btnLogout-popup:hover {

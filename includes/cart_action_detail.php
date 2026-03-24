@@ -11,16 +11,17 @@ if (
     !isset($_SESSION['user']) || 
     !isset($_SESSION['user']['username']) || 
     !isset($_SESSION['user']['role'])
-) 
-exit;
-
-
-
-
+) {
+    echo json_encode([
+        "success" => false,
+        "message" => "Please log in before performing this action."
+    ]);
+    exit;
+}
 
 include "../app/config/data_connect.php"; // Kết nối database
 
-$username = $_SESSION['user']['username'];
+$user_id = $_SESSION['user']['user_id'];
 $role = $_SESSION['user']['role'];
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -29,7 +30,7 @@ $product_id = intval($data['product_id'] ?? 0);
 $quantity = intval($data['quantity'] ?? 1); // Lấy số lượng từ yêu cầu AJAX, mặc định là 1
 
 // Kiểm tra user có tồn tại không
-$sql_check_user = "SELECT user_name FROM users WHERE user_name = ?";
+$sql_check_user = "SELECT username FROM users WHERE user_id = ?";
 $stmt_check_user = $conn->prepare($sql_check_user);
 $stmt_check_user->bind_param("s", $username);
 $stmt_check_user->execute();
@@ -42,7 +43,7 @@ if ($result_user->num_rows === 0) {
 
 if ($action == "add" && $product_id > 0) {
     // Kiểm tra xem sản phẩm đã có trong giỏ chưa
-    $sql_check = "SELECT quantity FROM cart WHERE user_name = ? AND product_id = ?";
+    $sql_check = "SELECT quantity FROM cart WHERE user_id = ? AND product_id = ?";
     $stmt_check = $conn->prepare($sql_check);
     $stmt_check->bind_param("si", $username, $product_id);
     $stmt_check->execute();
@@ -50,20 +51,20 @@ if ($action == "add" && $product_id > 0) {
 
     if ($result->num_rows > 0) {
         // Nếu sản phẩm đã có trong giỏ, tăng số lượng lên
-        $sql_update = "UPDATE cart SET quantity = quantity + ? WHERE user_name = ? AND product_id = ?";
+        $sql_update = "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param("isi", $quantity, $username, $product_id);
         $stmt_update->execute();
     } else {
         // Nếu chưa có, thêm sản phẩm mới vào giỏ
-        $sql_insert = "INSERT INTO cart (user_name, product_id, quantity) VALUES (?, ?, ?)";
+        $sql_insert = "INSERT INTO cart (username, product_id, quantity) VALUES (?, ?, ?)";
         $stmt_insert = $conn->prepare($sql_insert);
         $stmt_insert->bind_param("sii", $username, $product_id, $quantity);
         $stmt_insert->execute();
     }
 
     // Truy vấn lại tổng số lượng sản phẩm trong giỏ hàng của user
-    $cart_query = "SELECT SUM(quantity) as total_items FROM cart WHERE user_name = ?";
+    $cart_query = "SELECT SUM(quantity) as total_items FROM cart WHERE user_id = ?";
     $stmt_cart = $conn->prepare($cart_query);
     $stmt_cart->bind_param("s", $username);
     $stmt_cart->execute();

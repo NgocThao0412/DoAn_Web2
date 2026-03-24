@@ -1,6 +1,12 @@
 RewriteEngine On
 RewriteBase /Project/
 
+# LOGIN
+RewriteRule ^login$ index.php?page=login [L,QSA]
+
+# REGISTER
+RewriteRule ^register$ index.php?page=register [L,QSA]
+
 # ✅ Route trang chủ người dùng
 RewriteCond %{REQUEST_URI} !^/index\.php$
 RewriteRule ^$ index.php?pages=home [QSA,L]
