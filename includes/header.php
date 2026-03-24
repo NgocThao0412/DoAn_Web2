@@ -64,9 +64,9 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
             <div class="advanced-search-fields" id="advanced-search-fields">
                 <select name="category" class="search-criteria">
                     <option value="all"<?= $searchCategory === 'all' ? ' selected' : '' ?>>Tất cả danh mục</option>
-                    <option value="Macaron"<?= $searchCategory === 'macaron' ? ' selected' : '' ?>>Macaron</option>
+                    <option value="macaron"<?= $searchCategory === 'macaron' ? ' selected' : '' ?>>Macaron</option>
                     <option value="croissant"<?= $searchCategory === 'croissant' ? ' selected' : '' ?>>Croissant</option>
-                    <option value="Drink"<?= $searchCategory === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
+                    <option value="drink"<?= $searchCategory === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
                 </select>
                 <input type="number" min="0" name="minPrice" class="search-criteria" value="<?= $minPrice ?>" placeholder="Giá từ">
                 <input type="number" min="0" name="maxPrice" class="search-criteria" value="<?= $maxPrice ?>" placeholder="Giá đến">

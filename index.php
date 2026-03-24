@@ -76,6 +76,21 @@ if (in_array($page, $protectedPages)) {
     }
 }
 
+$page = $_GET['page'] ?? ($_GET['pages'] ?? 'home');
+
+// Nếu URL rewrite /macaron hoặc /croissant ... thì dùng category và chuyển trang về home
+$categoryPages = ['Macaron' => 'Macaron', 'croissant' => 'croissant', 'Drink' => 'Drink', 'all' => 'all'];
+if (isset($categoryPages[$page])) {
+    $_GET['category'] = $categoryPages[$page];
+    $page = 'home';
+}
+// Nếu page là số hoặc không hợp lệ, về 'home'
+if (is_numeric($page)) {
+    $page = 'home';
+} elseif (!in_array($page, ['home', 'advance', 'product', 'search', 'about', 'order','receipt', 'login', 'register', 'pay', 'profile'])) {
+    $page = 'product';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -89,35 +104,36 @@ if (in_array($page, $protectedPages)) {
     <?php
     // Giả sử $page được lấy ở index.php hoặc set ở header trước khi include
     if ($page === 'login') {
-        echo '<link rel="stylesheet" href="./public/assets/css/login.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/login.css">';
     } elseif ($page === 'register') {
-        echo '<link rel="stylesheet" href="./public/assets/css/login.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/login.css">';
     } elseif ($page === 'about') {
-        echo '<link rel="stylesheet" href="./public/assets/css/about.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/about.css">';
     } elseif ($page === 'receipt') {
-        echo '<link rel="stylesheet" href="./public/assets/css/receipt.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/receipt.css">';
     } elseif ($page === 'advance') {
-        echo '<link rel="stylesheet" href="./public/assets/css/searchpro.css">';
-        echo '<link rel="stylesheet" href="./public/assets/css/index.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/searchpro.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/index.css">';
     } elseif ($page === 'home') {
-        echo '<link rel="stylesheet" href="./public/assets/css/index.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/index.css">';
     } elseif ($page === 'product') {
-        echo '<link rel="stylesheet" href="./public/assets/css/product_detail.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/product_detail.css">';
     }elseif ($page ==='pay') {
-        echo '<link rel="stylesheet" href="./public/assets/css/pay.css">';
+        echo '<link rel="stylesheet" href="public/assets/css/pay.css">';
     } elseif ($page === 'profile') {
-    echo '<link rel="stylesheet" href="./public/assets/css/profile.css">';
+    echo '<link rel="stylesheet" href="public/assets/css/profile.css">';
     }
     ?>
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+   
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" crossorigin="anonymous" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js" crossorigin="anonymous"></script>
 
-    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" crossorigin="anonymous"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js" crossorigin="anonymous"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" crossorigin="anonymous"></script>
     <link rel="icon" href="<?php echo 'public/assets/Img/golden_crumb.png'; ?>" type="image/x-icon" />
     
 
@@ -132,11 +148,8 @@ if (in_array($page, $protectedPages)) {
     <div class="Home_main">
     <?php if ($page === 'advance'): ?>
 
-        <div class="search-container">
-            <?php require __DIR__ . '/pages/searchpro.php'; ?>
-        </div>
-
         <div class="products-container">
+            <?php include __DIR__ . '/includes/banner.php'; ?>
             <?php include 'includes/products.php'; ?>
         </div>
 

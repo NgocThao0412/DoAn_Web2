@@ -295,7 +295,7 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
             </li>
             <li>/</li>
             <li>
-                <a class="nav-item <?= isActiveCategory($category, 'macaron') ?>" href="macaron">
+                <a class="nav-item <?= isActiveCategory($category, 'macaron') ?>" href="Macaron">
                    Macaron
                 </a>
 
@@ -309,7 +309,7 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
             </li>
             <li>/</li>
             <li>
-              <a class="nav-item <?= isActiveCategory($category, 'drink') ?>" href="drink">
+              <a class="nav-item <?= isActiveCategory($category, 'drink') ?>" href="Drink">
                    Đồ Uống
                 </a>
             </li>
