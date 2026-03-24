@@ -30,8 +30,9 @@
 
 .about-content {
     display: flex;
-    gap: 20px;
+    gap: 18px;
     margin-bottom: 20px;
+
 }
 
 .column {

@@ -389,7 +389,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPage = 1;
     let selectedCategory = "all"; // Mặc định là All
 
-    
     // Xử lý sự kiện lọc sản phẩm khi thay đổi radio input
     document.querySelectorAll(".nav-item").forEach(item => {
         item.addEventListener("click", () => {
@@ -462,7 +461,8 @@ function showHints(inputField) {
                 hintContainer.style.display = "block";
                 return;
             }
-
+            console.log(products);
+            console.log(typeof products);
             products.forEach(item => {
                 const hintItem = document.createElement("div");
                 hintItem.className = "hint-item";
@@ -491,7 +491,6 @@ function showHints(inputField) {
     const searchButtons = document.querySelectorAll(".searchBtn");
 
 
-
     function removeVietnameseTones(str) {
         return str.normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
@@ -510,7 +509,10 @@ function showHints(inputField) {
         });
     
         input.addEventListener('input', function () {
-            const hintContainer = this.closest(".search-container").querySelector(".hint-container");
+            const container = this.closest(".search-container");
+            if (!container) return;
+
+            const hintContainer = container.querySelector(".hint-container");
             if (!hintContainer) return;
     
             const value = this.value.trim();
@@ -552,8 +554,13 @@ function showHints(inputField) {
         input.addEventListener("blur", function () {
             setTimeout(() => {
                 if (!isSelectingHint) {
-                    const hintContainer = this.closest(".search-container").querySelector(".hint-container");
-                    if (hintContainer) hintContainer.style.display = "none";
+                    const container = this.closest(".search-container");
+                    if (!container) return;
+
+                    const hintContainer = container.querySelector(".hint-container");
+                    if (hintContainer) {
+                    hintContainer.style.display = "none";
+}
                 }
                 isSelectingHint = false;
             }, 200);
@@ -697,4 +704,49 @@ $(document).ready(function(){
     });
 });
 
+document.querySelector("form").addEventListener("submit", function(e) {
+    const minPrice = parseFloat(document.querySelector('input[name="minPrice"]').value) || 0;
+    const maxPrice = parseFloat(document.querySelector('input[name="maxPrice"]').value) || 0;
 
+    if (minPrice > maxPrice && maxPrice !== 0) {
+        e.preventDefault();
+        alert("❌ Giá từ không được lớn hơn giá đến!");
+    }
+});
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".filters-form");
+    if (!form) {
+        console.error("❌ Không tìm thấy form");
+        return;
+    }
+
+    const errorDiv = document.getElementById("price-error");
+
+    form.addEventListener("submit", function(e) {
+        const minInput = form.querySelector('input[name="minPrice"]');
+        const maxInput = form.querySelector('input[name="maxPrice"]');
+
+        let minPrice = parseFloat(minInput.value);
+        let maxPrice = parseFloat(maxInput.value);
+
+        // reset lỗi
+        if (errorDiv) {
+            errorDiv.style.display = "none";
+            errorDiv.textContent = "";
+        }
+
+        // ❌ min > max
+        if (!isNaN(minPrice) && !isNaN(maxPrice) && minPrice > maxPrice) {
+            e.preventDefault();
+
+            if (errorDiv) {
+                errorDiv.textContent = "❌ Giá từ phải nhỏ hơn hoặc bằng giá đến!";
+                errorDiv.style.display = "block";
+            } else {
+                alert("❌ Giá từ phải nhỏ hơn hoặc bằng giá đến!");
+            }
+
+            return;
+        }
+    });
+});

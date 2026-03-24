@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch(`http://localhost/Project/pages/getAllProduct.php?term=${encodeURIComponent(searchTerm)}`)
+        fetch(`http://localhost/webb/pages/getAllProduct.php?term=${encodeURIComponent(searchTerm)}`)
            .then(response => response.json())
            .then(products => {
                hintContainer.innerHTML = "";
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      hintItem.addEventListener("click", function () {
                          isSelectingHint = false; // Reset biến
                        console.log(item.product_id);
-                        window.location.href = `/b/index.php?page=product&id=${item.product_id}`;
+                        window.location.href = `/webb/index.php?page=product&id=${item.product_id}`;
                    });                    
 
                   hintContainer.appendChild(hintItem);
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (this.value.trim() === "") {
             // Nếu xóa sạch trên header, quay về home, giữ hash để focus vào ô mới
             if (isHeaderSearch) {
-                window.location.href = 'index.php#searchHeader';
+                window.location.href = '/webb/index.php#searchHeader';
                 return;
             }
 

@@ -750,6 +750,7 @@
         grid-template-columns: repeat(4, 1fr);
         margin: 0px auto;
     }
+    
 }
 
 @media screen and (max-width: 640px) {
@@ -960,7 +961,8 @@
         display: flex;
         list-style-type: none;
         padding: 0;
-        margin: 0 0 0 -163px;
+        margin: 0 0 0 -130px;
+        justify-content: center;
     }
         
     .nav-links a {
@@ -1052,9 +1054,15 @@
         text-align: justify;
         text-justify: inter-word;
     }
+    .nav-links .nav-item {
+    font-size: 12px !important;
+}
+.nav-links li {
+        margin: 0 0.025px !important;     
+    }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 375px) {
     .search-input .search-icon button{
         width: 38px;
         height: 38px;
@@ -1161,6 +1169,11 @@
         text-align: justify;
         text-justify: inter-word;
     }
-
+      .nav-links .nav-item {
+    font-size: 10px !important;
+}
+  .nav-links li {
+        margin: 0 0px !important;     
+    }
     
 }
