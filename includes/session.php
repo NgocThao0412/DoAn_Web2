@@ -1,15 +1,39 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_name("user");
 session_start();
 header('Content-Type: application/json');
 
 include('../app/config/data_connect.php');
 
+// Kiểm tra kết nối database
+if (!$conn) {
+    echo json_encode([
+        'loggedIn' => false,
+        'username' => null,
+        'role' => null,
+        'status' => null,
+        'message' => 'Database connection error.'
+    ]);
+    exit();
+}
+
 if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
     $user_name = $_SESSION['user']['username'] ?? null;
     if ($user_name) {
         // Kiểm tra trạng thái của tài khoản từ cơ sở dữ liệu
-        $stmt = $conn->prepare("SELECT status FROM users WHERE user_name = ?");
+        $stmt = $conn->prepare("SELECT status FROM users WHERE username = ?");
+        if (!$stmt) {
+            echo json_encode([
+                'loggedIn' => true,
+                'username' => $_SESSION['user']['username'] ?? null,
+                'role' => $_SESSION['user']['role'] ?? null,
+                'status' => null,
+                'message' => null
+            ]);
+            exit();
+        }
         $stmt->bind_param("s", $user_name);
         $stmt->execute();
         $result = $stmt->get_result();
