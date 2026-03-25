@@ -285,20 +285,45 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Lỗi:", error));
     }
     
-    function updateTotalPrice() {
-        let totalPrice = 0;
-        document.querySelectorAll(".cart-item").forEach(item => {
-            let price = parseFloat(item.querySelector(".item-price").textContent.replace("₫", "").replace(",", "").trim());
-            let quantity = parseInt(item.querySelector(".quantity-input").value);
-            totalPrice += price * quantity;
-        });
-    
-        // Cập nhật vào giao diện
-        const totalElement = document.querySelector(".cart-total .total-amount");
-        if (totalElement) {
-            totalElement.textContent = totalPrice.toLocaleString() + " ₫";
-        }
+   function updateTotalPrice() {
+    const items = document.querySelectorAll(".cart-item, .Cake-infor");
+
+    if (!items.length) return;
+
+    let total = 0;
+
+    items.forEach(item => {
+
+        // lấy giá (hỗ trợ nhiều class)
+        const priceEl =
+            item.querySelector(".price") ||
+            item.querySelector(".price-10") ||
+            item.querySelector(".price-product");
+
+        // lấy input số lượng
+        const quantityEl =
+            item.querySelector(".quantity") ||
+            item.querySelector("input");
+
+        // ❗ CHẶN NULL TẠI ĐÂY
+        if (!priceEl || !quantityEl) return;
+
+        // ❗ CHẶN textContent null
+        const priceText = priceEl.textContent;
+        if (!priceText) return;
+
+        const price = parseFloat(priceText.replace(/[^\d]/g, "")) || 0;
+        const quantity = parseInt(quantityEl.value) || 1;
+
+        total += price * quantity;
+    });
+
+    const totalEl = document.querySelector(".total-price");
+
+    if (totalEl) {
+        totalEl.textContent = total.toLocaleString() + "đ";
     }
+}
     
 
     // Hàm lấy danh sách giỏ hàng
@@ -715,10 +740,8 @@ document.querySelector("form").addEventListener("submit", function(e) {
 });
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".filters-form");
-    if (!form) {
-        console.error("❌ Không tìm thấy form");
-        return;
-    }
+     if (!form) return;
+
 
     const errorDiv = document.getElementById("price-error");
 

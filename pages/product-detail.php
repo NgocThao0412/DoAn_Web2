@@ -58,7 +58,7 @@ if (!empty($product)) {
                 </div>
                 <div class="border"></div>
                 <div class="size-descibe">
-                    <p class="price-10 mg-l">' . number_format($product['selling_price'], 0, ',', '.') . ' VNĐ</p>
+                    <p class="price">' . number_format($product['selling_price'], 0, ',', '.') . ' VNĐ</p>
                 </div>
                 <div class="border"></div>
                 <div class="quantity-cake">
@@ -67,7 +67,7 @@ if (!empty($product)) {
                         <button class="minus-btn">
                             <p>-</p>
                         </button>
-                        <input type="text" name="" id="" value="1">
+                      <input type="text" class="quantity" value="1">
                         <button class="plus-btn">
                             <p>+</p>
                         </button>
@@ -78,11 +78,11 @@ if (!empty($product)) {
                 
                 // Kiểm tra trạng thái sản phẩm để hiển thị nút Add to cart hoặc nút vô hiệu
                 if (isset($product['status']) && ($product['status'] === 'Out of Stock' || $product['status'] === 'Discontinued')) {
-                    echo '<button class="sp-cart add-to-cart-detail disabled" data-id="' . htmlspecialchars($product['product_id']) . '" disabled>';
+                    echo '<button class="sp-cart add-to-cart butn title" data-id="' . htmlspecialchars($product['product_id']) . '" disabled>';
                     echo '<p>' . htmlspecialchars($product['status']) . '</p>';
                     echo '</button>';
                 } else {
-                    echo '<button class="add-to-cart-detail" data-id="' . htmlspecialchars($product['product_id']) . '">';
+                    echo '<button class="add-to-cart" data-id="' . htmlspecialchars($product['product_id']) . '">';
                     echo '<p class="add-to-cart-btn">Thêm vào giỏ</p>';
                     echo '</button>';
                 }
