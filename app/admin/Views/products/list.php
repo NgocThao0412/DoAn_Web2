@@ -43,6 +43,8 @@ $sql = "SELECT
             p.image,
             p.status,
             p.selling_price,
+            p.profit_percent,
+            p.current_stock,
             c.name AS category_name
         FROM products p
         JOIN category c ON p.category_id = c.category_id
@@ -61,7 +63,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['product_id'];
     $name = $_POST['products_name'];
     $status = $_POST['products_status'];
-    $price = $_POST['products_price'];
+    $description = $_POST['products_description'];
+    $category = $_POST['products_category'];
+    $current_stock = $_POST['current_stock'];
+    $remove_photo = $_POST['remove_photo_flag']; // Cờ xóa ảnh
+
+    $db_image_path = null;
+
+// 1. Nếu có upload file mới
+    if (!empty($_FILES['products_image']['name'])) {
+        // ... (Giữ nguyên đoạn code xử lý upload file cũ của bạn ở đây) ...
+        // Sau khi upload thành công:
+        // $db_image_path = $relative_path . $new_filename;
+    } 
+    // 2. Nếu người dùng nhấn nút Xóa ảnh (về mặc định)
+    elseif ($remove_photo == "1") {
+        $db_image_path = "public/assets/Img/default.png"; 
+    }
+
+    // Câu lệnh SQL linh hoạt
+    if ($db_image_path) {
+        // Cập nhật bao gồm cả đường dẫn ảnh mới (hoặc ảnh mặc định)
+        $stmt = $conn->prepare("UPDATE products SET name=?, description=?, status=?, category_id=?, image=?, current_stock=? WHERE product_id=?");
+        $stmt->bind_param("sssissi", $name, $description, $status, $category, $db_image_path, $current_stock, $id);
+    } else {
+        // Không thay đổi ảnh (giữ ảnh cũ trong DB)
+        $stmt = $conn->prepare("UPDATE products SET name=?, status=?, category_id=?, description=?, current_stock=? WHERE product_id=?");
+        $stmt->bind_param("ssisii", $name, $status, $category, $description, $current_stock, $id);
+    }
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Cập nhật thành công!'); window.location.href = 'list-product';</script>";
+    }
 
 if ($price < 0) {
     echo "<script>
@@ -82,7 +115,7 @@ if ($price < 0) {
 
     if (!empty($_FILES['products_image']['name'])) {
         $folderName = str_replace(' ', '', $categoryName);
-        $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/DoAnWeb2/public/assets/Img/" . $folderName . "/";
+        $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/DoAn_Web2/public/assets/Img/" . $folderName . "/";
         // tạo folder nếu chưa tồn tại
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
@@ -111,30 +144,42 @@ if ($price < 0) {
         }
         
 
-        if (move_uploaded_file($_FILES["products_image"]["tmp_name"], $target_file)) {
-$stmt = $conn->prepare("
-UPDATE products 
-SET name=?, description=?, status=?, selling_price=?, category_id=?, image=? 
-WHERE product_id=?
-");
+if (move_uploaded_file($_FILES["products_image"]["tmp_name"], $target_file)) {
+    $stmt = $conn->prepare("
+        UPDATE products 
+        SET name=?, description=?, status=?, category_id=?, image=?, current_stock=? 
+        WHERE product_id=?
+    ");
 
-$stmt->bind_param(
-"sssissi",
-$name,
-$description,
-$status,
-$price,
-$category,
-$db_image_path,
-$id
-);
-        } else {
+    $stmt->bind_param(
+        "sssissi", // Rút gọn lại chuỗi định dạng
+        $name,
+        $description,
+        $status,
+        $category,
+        $db_image_path,
+        $_POST['current_stock'],
+        $id
+    );
+} else {
             $errorMsg = "❌ Tải hình ảnh thất bại!";
         }
-    } else {
-        $stmt = $conn->prepare("UPDATE products SET name=?, status=?, selling_price=?, category_id=?, description=? WHERE product_id=?");
-        $stmt->bind_param("sssisi", $name, $status, $price, $category, $description, $id);
-    }
+} else {
+    $stmt = $conn->prepare("
+        UPDATE products 
+        SET name=?, status=?, category_id=?, description=?, current_stock=? 
+        WHERE product_id=?
+    ");
+    $stmt->bind_param(
+        "ssisii", // 2 chuỗi, 1 số nguyên, 1 chuỗi, 2 số nguyên
+        $name,
+        $status,
+        $category,
+        $description,
+        $_POST['current_stock'],
+        $id
+    );
+}
 
     if (isset($stmt) && $stmt->execute()) {
         echo "<script>
@@ -215,62 +260,59 @@ function openFileChooserIfCategorySelected() {
     <div class="product-head">HÌNH ẢNH</div>
     <div class="product-head">TRẠNG THÁI</div>
     <div class="product-head">GIÁ TIỀN</div>
+    <div class="product-head">LỢI NHUẬN</div>
+    <div class="product-head">TỒN KHO</div>
     <div class="product-head">LOẠI SẢN PHẨM</div>
     <div class="product-head">CHỨC NĂNG</div>
 
     
-    <?php while ($row = $result->fetch_assoc()) { ?>
-        <div class="product-items"> <?php echo $row['product_id']; ?> </div>
-        <div class="product-items"> <?php echo $row['name']; ?> </div>
-        <div class="product-items">
+<?php while ($row = $result->fetch_assoc()) { ?>
+    <div class="product-items"> <?php echo $row['product_id']; ?> </div>
+
+    <div class="product-items"> <?php echo htmlspecialchars($row['name']); ?> </div>
+
+    <div class="product-items">
+        <?php $image_path = "../../" . htmlspecialchars($row['image']); ?>
+        <img src="<?php echo $image_path; ?>" width="90" height="90" alt="" style="object-fit: cover; border-radius: 5px;">
+    </div>
+
+    <div class="product-items">
+        <span class="<?= 'status-label ' . strtolower(str_replace(' ', '-', $row['status'])) ?>">
             <?php 
-            $image_path = "../../" . htmlspecialchars($row['image']);
-            // Vì 'image' đã là đường dẫn tương đối
-
+                switch (strtolower(trim($row['status']))) {
+                    case 'available': echo "HIỂN THỊ"; break;
+                    case 'hidden': echo "ĐÃ ẨN"; break;
+                    default: echo htmlspecialchars($row['status']);
+                }
             ?>
-            <img src="<?php echo $image_path; ?>" width="90" height="90" alt="">
-        </div>
-        <div class="product-items">
-            <span class="<?= 'status-label ' . strtolower(str_replace(' ', '-', $row['status'])) ?>">
-                <?php 
-                   switch (strtolower(trim($row['status']))) {
-    case 'available':
-        echo "HIỂN THỊ";
-        break;
-    case 'hidden':
-        echo "ĐÃ ẨN";
-        break;
-    default:
-        echo htmlspecialchars($row['status']);
-}
-                ?>
-            </span>
-        </div>
+        </span>
+    </div>
 
+    <div class="product-items"> <?php echo number_format($row['selling_price']); ?> VND </div>
 
-        <div class="product-items"> <?php echo number_format($row['selling_price']); ?> VND </div>
-        <div class="product-items"> <?php echo $row['category_name']; ?> </div>
-        <div class="product-items">
-        <a href="list-product?edit_id=<?= $row['product_id'] ?>#editModal"
-class="edit-btn"
-data-id="<?= $row['product_id'] ?>">
+    <div class="product-items"> <?php echo number_format($row['profit_percent'], 2); ?>% </div>
+
+    <div class="product-items"> <?php echo number_format($row['current_stock']); ?> </div>
+
+    <div class="product-items"> <?php echo htmlspecialchars($row['category_name']); ?> </div>
+
+    <div class="product-items">
+        <a href="list-product?edit_id=<?= $row['product_id'] ?>#editModal" class="edit-btn" data-id="<?= $row['product_id'] ?>">
             <i class="fas fa-edit"></i>
         </a>
 
-<form method="GET" action="Controllers/hidden.php" style="display:inline;">
-    <input type="hidden" name="product_id" value="<?= $row['product_id']; ?>">
-    <input type="hidden" name="delete_image" id="delete_image" value="0">
-
-   <button type="submit" class="delete-button">
-<?php if ($row['status'] == 'HIDDEN'): ?>
-    <i class="fas fa-eye"></i>
-<?php else: ?>
-    <i class="fas fa-eye-slash"></i>
-<?php endif; ?>
-</button>
-</form>
-        </div>
-    <?php } ?>
+        <form method="GET" action="Controllers/hidden.php" style="display:inline;">
+            <input type="hidden" name="product_id" value="<?= $row['product_id']; ?>">
+            <button type="submit" class="delete-button">
+                <?php if ($row['status'] == 'HIDDEN'): ?>
+                    <i class="fas fa-eye"></i>
+                <?php else: ?>
+                    <i class="fas fa-eye-slash"></i>
+                <?php endif; ?>
+            </button>
+        </form>
+    </div>
+<?php } ?>
 </div>
 
 
@@ -292,20 +334,28 @@ data-id="<?= $row['product_id'] ?>">
             <!-- Phần chứa ảnh hiện tại và ảnh preview -->
             <div id="image-preview-container" style="display: flex; gap: 30px; align-items: flex-start; margin-bottom: 10px;">
                 <!-- NOW -->
-                <div style="flex: 1;">
-                    <label>Hiện tại:</label><br>
-                    <?php if (!empty($editingProduct['image'])): ?>
-                        <img 
-id="current_product_image"
-src="../../<?= htmlspecialchars($editingProduct['image']) ?>" 
-width="120" 
-height="90" alt="Current Image" style="border: 1px solid #ccc; border-radius: 4px;">
+<div style="flex: 1;">
+    <label>Hiện tại:</label><br>
+    <div style="position: relative; display: inline-block;">
+        <?php if (!empty($editingProduct['image'])): ?>
+            <img id="current_product_image" 
+                 src="../../<?= htmlspecialchars($editingProduct['image']) ?>" 
+                 width="120" height="90" alt="Current Image" 
+                 style="border: 1px solid #ccc; border-radius: 4px; object-fit: cover;">
+            
+            </button>
+        <?php else: ?>
+            <span>Không có hình ảnh!</span>
+        <?php endif; ?>
+    </div>
 
-<br>
-                    <?php else: ?>
-                        <span>Không có hình ảnh nào hợp lệ !</span>
-                    <?php endif; ?>
-                </div>
+<button type="button" onclick="removeCurrentPhoto()" 
+        style="width: fit-content; background-color: #e74c3c; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-top: 5px;">
+    <i class="fas fa-trash-alt" style="font-size: 11px;"></i> Xóa hình ảnh
+</button>
+    
+    <input type="hidden" id="remove_photo_flag" name="remove_photo_flag" value="0">
+</div>
 
                 <!-- PREVIEW -->
                 <div style="flex: 1;">
@@ -314,6 +364,8 @@ height="90" alt="Current Image" style="border: 1px solid #ccc; border-radius: 4p
                     <input type="file" id="products_image" name="products_image" accept=".jpg,.jpeg,.png" style="display: none;">
 
                     <input type="button" class="browse-button" value="Duyệt..." onclick="openFileChooserIfCategorySelected()" style="margin-top: 5px;">
+
+                    
                 </div>
             </div>
 
@@ -354,10 +406,24 @@ Hiển thị
 
 </select>
 
-            <label for="products_price" style="font-weight: bold;">Giá:</label>
-            <input type="number" id="products_price" name="products_price"
-value="<?= $editingProduct['selling_price'] ?>" 
-min="0" step="1" required>
+<label for="products_price" style="font-weight: 800; color: #333; margin-bottom: 8px; display: block;">Giá bán:</label>
+<input type="number" id="products_price" name="products_price"
+       value="<?= $editingProduct['selling_price'] ?>" 
+       readonly 
+       tabindex="-1"
+       style="background-color: #f5f5f5; color: #888; cursor: not-allowed; border: 1px solid #ddd; margin-bottom: 15px;">
+
+<label for="profit_percent" style="font-weight: 800; color: #333; margin-bottom: 8px; display: block;">Tỉ lệ lợi nhuận:</label>
+<input type="number" id="profit_percent" name="profit_percent" 
+       value="<?= $editingProduct['profit_percent'] ?>" 
+       readonly 
+       tabindex="-1"
+       style="background-color: #f5f5f5; color: #888; cursor: not-allowed; border: 1px solid #ddd;">
+
+<label for="current_stock" style="font-weight: bold;">Số lượng tồn kho:</label>
+<input type="number" id="current_stock" name="current_stock" 
+       value="<?= $editingProduct['current_stock'] ?>" 
+       min="0" required>
 
             <label for="products_category" style="font-weight: bold;">Loại sản phẩm:</label>
 <select id="products_category" name="products_category">
@@ -370,15 +436,25 @@ while ($cat = $catResult->fetch_assoc()): ?>
     </option>
 <?php endwhile; ?>
 </select>
-            <label for="products_description" style="font-weight:bold;">Mô tả</label>
+<label for="products_description" style="font-weight:bold; grid-column: 1 / -1; margin-top: 10px;">Mô tả:</label>
 
 <textarea
-id="products_description"
-name="products_description"
-rows="3"><?= htmlspecialchars($editingProduct['description'] ?? '') ?></textarea>
+    id="products_description"
+    name="products_description"
+    rows="5"
+    style="grid-column: 1 / -1; width: 100%; min-height: 120px; padding: 10px; border: 1px solid #D5909f; border-radius: 8px; box-sizing: border-box; resize: vertical;"
+><?= htmlspecialchars($editingProduct['description'] ?? '') ?></textarea>
 
-            <button type="submit" style="font-weight: bold;">Lưu</button>
-            <a href="list-product" class="cancel-button">Hủy</a>
+            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+    
+    <button type="submit" style="font-weight: bold; background-color: #4CAF50; color: white; padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer; margin: 0;">
+        Lưu
+    </button>
+    
+    <a href="list-product" class="cancel-button" style="text-decoration: none; color: #9b59b6; font-weight: bold; display: flex; align-items: center; padding: 0 10px; margin: 0;">
+        Hủy
+    </a>
+</div>
         </form>
     </div>
 </div>

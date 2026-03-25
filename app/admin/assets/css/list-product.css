@@ -24,9 +24,11 @@
     display: grid;
     /* grid-template-columns: 15vh 36vh 30vh 20vh 25vh 26vh 21vh; */
     /* grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); */
-    grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr 1fr ;
+    grid-template-columns: 0.5fr 2fr 1.5fr 1.2fr 1.5fr 1fr 1fr 1.5fr 1fr;
     margin: 20px;
     align-items: center;
+    border-radius: 8px;
+    overflow: hidden; /* Tránh tràn viền */
 }
 
 .product-head {
@@ -37,6 +39,13 @@
     border: 0.5px solid #845c5c;
     text-align: center;
     color: #455265;
+    /* CHI TIẾT CẦN THÊM */
+    display: flex;            /* Sử dụng flex để căn giữa chữ */
+    align-items: center;      /* Căn giữa theo chiều dọc */
+    justify-content: center;   /* Căn giữa theo chiều ngang */
+    height: 60px;             /* Cố định chiều cao cho tất cả tiêu đề */
+    box-sizing: border-box;    /* Đảm bảo padding không làm tăng kích thước ô */
+    margin: 0;                /* Loại bỏ mọi margin thừa gây trồi sụt */
 }
 
 .product-items {
@@ -522,8 +531,9 @@
 .edit-notification{
     overflow-y: auto;
     max-height: 600px
-
 }
+
+
 
 /*FFE9F8;*/
 .notification {

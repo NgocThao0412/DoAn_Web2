@@ -1156,3 +1156,72 @@ header.hide {
         transform: translateY(0);
     }
 }
+
+/* Làm đậm chữ và icon cho mục đang chọn */
+.subject-item.active-nav .text-in a, 
+.subject-item.active-nav .text-in ion-icon,
+.grade-button.active-nav .text-head {
+    font-weight: 700 !important; /* In đậm */
+    color: #9D5068 !important;   /* Màu hồng đậm */
+}
+
+/* Thêm màu nền nhẹ và vạch kẻ bên trái để dễ nhận diện */
+.subject-item.active-nav {
+    background-color: #fdf2f5 !important; 
+    border-left: 4px solid #9D5068 !important;
+}
+
+/* Đảm bảo link không bị gạch chân và giữ màu khi in đậm */
+.colorForLink {
+    transition: all 0.2s ease;
+}
+
+/* Giao diện Mobile (Màn hình nhỏ hơn 768px) */
+@media screen and (max-width: 768px) {
+    /* 1. Chỉnh lại Grid chỉ còn 5 cột: ID, Tên, Ảnh, Giá, Chức năng */
+    .product-grid {
+        grid-template-columns: 40px 1fr 80px 100px 80px !important;
+        gap: 5px;
+        font-size: 13px; /* Giảm cỡ chữ cho gọn */
+    }
+
+    /* 2. Ẩn các tiêu đề (Header) không cần thiết */
+    /* Ẩn: Trạng thái (4), Lợi nhuận (6), Tồn kho (7), Loại sản phẩm (8) */
+    .product-head:nth-child(4),
+    .product-head:nth-child(6),
+    .product-head:nth-child(7),
+    .product-head:nth-child(8) {
+        display: none !important;
+    }
+
+    /* 3. Ẩn các nội dung (Items) tương ứng trong vòng lặp */
+    /* Lưu ý: Bạn cần đếm đúng thứ tự div trong vòng lặp while của mình */
+    .product-items:nth-child(9n+4), /* Trạng thái */
+    .product-items:nth-child(9n+6), /* Lợi nhuận */
+    .product-items:nth-child(9n+7), /* Tồn kho */
+    .product-items:nth-child(9n+8) { /* Loại sản phẩm */
+        display: none !important;
+    }
+
+    /* 4. Chỉnh lại ảnh cho nhỏ gọn trên mobile */
+    .product-items img {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    /* 5. Thu nhỏ các nút chức năng */
+    .edit-btn, .delete-button {
+        padding: 5px !important;
+        font-size: 12px !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .product-items:last-child {
+        display: flex;
+        flex-direction: column; /* Để nút Sửa và Ẩn nằm dọc trên mobile */
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+    }
+}

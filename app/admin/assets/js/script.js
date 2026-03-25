@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const menuMap = {
     "list-product": "gradeProduct",
     "add-product": "gradeProduct",
+    "add-category": "gradeProduct",
 
     "manager-user": "gradeUser",
     "add-user": "gradeUser",
@@ -186,4 +187,48 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Lấy tên file hiện tại từ URL (ví dụ: list-product)
+    const currentPath = window.location.pathname.split("/").pop().replace(".php", "");
+
+    // 2. Tìm tất cả các link trong menu
+    const menuLinks = document.querySelectorAll(".colorForLink");
+    const gradeButtons = document.querySelectorAll(".grade-button");
+
+    // Xử lý cho các mục con (subject-item)
+    menuLinks.forEach(link => {
+        const href = link.getAttribute("href").replace(".php", "");
+        
+        if (currentPath === href) {
+            const subjectItem = link.closest(".subject-item");
+            if (subjectItem) {
+                subjectItem.classList.add("active-nav"); // Thêm class in đậm
+
+                // Tự động mở menu cha (subject-list)
+                const parentList = subjectItem.closest(".subject-list");
+                if (parentList) {
+                    parentList.style.display = "block";
+                    
+                    // Xoay mũi tên chevron của menu cha
+                    const gradeId = parentList.id;
+                    const chevronId = "chevron" + gradeId.replace("grade", "");
+                    const chevron = document.getElementById(chevronId);
+                    if (chevron) {
+                        chevron.classList.remove("down");
+                        chevron.classList.add("up");
+                    }
+                }
+            }
+        }
+    });
+
+    // Xử lý cho các mục đơn (Quản lý người dùng, Đơn hàng, v.v.)
+    gradeButtons.forEach(btn => {
+        const onClickAttr = btn.getAttribute("onclick") || "";
+        if (onClickAttr.includes(currentPath) && !btn.querySelector(".chevron")) {
+            btn.classList.add("active-nav");
+        }
+    });
 });

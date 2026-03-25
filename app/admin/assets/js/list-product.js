@@ -29,8 +29,19 @@
 // });
 
 // 1) Lấy ảnh hiện tại và hiển thị đường dẫn theo định dạng "uploads/TênFile.jpg"
-const imgElement = document.getElementById('imagePreview');
-const filePathInput = document.getElementById('filePath');
+const imgElement = document.getElementById('current_product_image'); 
+const filePathInput = document.getElementById('preview-path');
+
+if (imgElement && filePathInput) {
+    const fullSrc = imgElement.src;
+    // Chỉ xử lý nếu ảnh có nguồn hợp lệ
+    if (fullSrc && !fullSrc.includes('undefined')) {
+        const segments = fullSrc.split('/');
+        const fileName = segments[segments.length - 1];
+        // Không gán cứng "uploads/", hãy để logic PHP tự xử lý đường dẫn
+        console.log("Ảnh hiện tại:", fileName);
+    }
+}
 
 // Lấy src tuyệt đối của ảnh
 const fullSrc = imgElement.src;
@@ -43,17 +54,21 @@ filePathInput.value = "uploads/" + fileName;
 // 2) Xử lý khi chọn ảnh mới
 function handleFileChange(inputElement) {
     const file = inputElement.files[0];
+    const categorySelect = document.getElementById("products_category");
+    const categoryName = categorySelect.options[categorySelect.selectedIndex].text.trim().replace(/\s+/g, '');
+    
     if (file) {
-    // Cập nhật đường dẫn file
-    const uploadPath = 'uploads/' + file.name;
-    filePathInput.value = uploadPath;
+        // Cập nhật đường dẫn hiển thị cho giống logic PHP
+        const previewPath = document.getElementById('preview-path');
+        if (previewPath) {
+            previewPath.value = `/assets/Img/${categoryName}/${file.name}`;
+        }
 
-    // Cập nhật ảnh hiển thị
-    if (typeof URL.createObjectURL === 'function') {
-        imgElement.src = URL.createObjectURL(file);
-    } else {
-        console.error("URL.createObjectURL không khả dụng trong trình duyệt này.");
-    }
+        // Cập nhật ảnh hiển thị
+        const imgPreview = document.getElementById('current_product_image'); // Hoặc wrapper preview của bạn
+        if (imgPreview) {
+            imgPreview.src = URL.createObjectURL(file);
+        }
     }
 }
 
@@ -217,27 +232,43 @@ function fetchAndEditProduct(productId) {
 // Hàm hiển thị form sửa và điền dữ liệu vào form
 function editProduct(product) {
     const overlay = document.getElementById('overlay');
-    const editForm = document.getElementById('editNotification');
+    const editModal = document.getElementById('editModal'); // Đổi từ editNotification sang editModal cho khớp ID HTML
 
-    if (!overlay || !editForm) {
-        console.error('Không tìm thấy overlay hoặc editNotification!');
+    if (!overlay || !editModal) {
+        console.error('Không tìm thấy overlay hoặc editModal!');
         return;
     }
 
     overlay.style.display = 'block';
-    editForm.style.display = 'block';
+    editModal.style.display = 'block';
 
-    // Gán dữ liệu vào form như bạn đã làm...
-    document.getElementById('product_name').value = product.product_name;
-    document.getElementById('product_price').value = product.price;
-    document.getElementById('product_category').value = product.category_name || product.category_id;
-    document.getElementById('product_status').value = product.status;
+    // Gán dữ liệu vào form - Chú ý ID phải khớp với thuộc tính 'id' trong thẻ input của file PHP
+    document.getElementById('products_name').value = product.name;
+    document.getElementById('products_price').value = product.selling_price;
+    document.getElementById('products_status').value = product.status;
+    document.getElementById('products_category').value = product.category_id;
+    document.getElementById('products_description').value = product.description || '';
+
+    // BỔ SUNG 2 TRƯỜNG MỚI THEO ERD
+    if(document.getElementById('profit_percent')) {
+        document.getElementById('profit_percent').value = product.profit_percent;
+    }
+    if(document.getElementById('current_stock')) {
+        document.getElementById('current_stock').value = product.current_stock;
+    }
     
+    // Cập nhật ảnh hiện tại
     const img = document.getElementById('current_product_image');
-    img.src = product.image;
-    img.style.display = 'block';
+    if (img) {
+        img.src = "../../" + product.image;
+        img.style.display = 'block';
+    }
 
-    console.log("Hiển thị form edit thành công");
+    // Reset đường dẫn preview
+    const previewPath = document.getElementById('preview-path');
+    if (previewPath) previewPath.value = '';
+
+    console.log("Đã đổ dữ liệu sản phẩm vào form edit");
 }
 
 
@@ -271,3 +302,22 @@ function showDeleteNotification() {
     document.getElementById('overlay').style.display = 'block';
 }
 
+function removeCurrentPhoto() {
+    if (confirm("Bạn có muốn xóa ảnh này và dùng ảnh mặc định không?")) {
+        const img = document.getElementById('current_product_image');
+        const flag = document.getElementById('remove_photo_flag');
+        const previewPath = document.getElementById('preview-path');
+
+        // 1. Thay đổi ảnh trên giao diện thành ảnh mặc định
+        // Đảm bảo bạn đã có file default.jpg trong thư mục này
+        img.src = "/DoAn_Web2/public/assets/Img/default.png"; 
+        
+        // 2. Bật cờ đánh dấu xóa để gửi lên PHP
+        flag.value = "1";
+
+        // 3. Xóa đường dẫn preview nếu đang chọn ảnh mới
+        if (previewPath) {
+            previewPath.value = "Sử dụng ảnh mặc định";
+        }
+    }
+}
