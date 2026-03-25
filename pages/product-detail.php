@@ -121,7 +121,7 @@ foreach ($product_rand as $items) {
              '</p>';
     } else {
         echo '<p class="price-product sp-cart add-to-cart" data-id="' . htmlspecialchars($items['product_id']) . '">
-                Price: ' . number_format($items['selling_price'], 0, ',', '.') . ' VNĐ
+                Giá: ' . number_format($items['selling_price'], 0, ',', '.') . ' VNĐ
               </p>';
     }
 
