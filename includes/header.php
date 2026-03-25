@@ -18,7 +18,7 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
     $username = htmlspecialchars($_SESSION['user']['username'] ?? 'Guest');
     $authButtons = '
         <div class="user-menu">
-            <button id="user-btn" class="btnLogin-popup">' . $username . '</button>
+             <button id="user-btn" class="btnLogin-popup" onclick="window.location.href=\'index.php?page=profile\'">' . $username . '</button>
             <form action="pages/Controllers/logout.php" method="POST" style="display: inline;">
                 <button type="submit" class="btnLogout-popup">Đăng xuất</button>
             </form>
@@ -66,7 +66,7 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
                     <option value="all"<?= $searchCategory === 'all' ? ' selected' : '' ?>>Tất cả danh mục</option>
                     <option value="macaron"<?= $searchCategory === 'macaron' ? ' selected' : '' ?>>Macaron</option>
                     <option value="croissant"<?= $searchCategory === 'croissant' ? ' selected' : '' ?>>Croissant</option>
-                    <option value="drink"<?= $searchCategory === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
+                    <option value="Drink"<?= $searchCategory === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
                 </select>
                 <input type="number" min="0" name="minPrice" class="search-criteria" value="<?= $minPrice ?>" placeholder="Giá từ">
                 <input type="number" min="0" name="maxPrice" class="search-criteria" value="<?= $maxPrice ?>" placeholder="Giá đến">
