@@ -1,83 +1,111 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    const form = document.getElementById("registerForm");
+    if (!form) return;
+
     const citySelect = document.getElementById("registerCity");
     const wardSelect = document.getElementById("registerWard");
-    const form = document.getElementById("registerForm");
-
-    if (!form) return;
 
     const cityNameHidden = document.getElementById("city_name");
     const wardNameHidden = document.getElementById("ward_name");
 
-    // ==============================
-    // LOAD TỈNH
-    // ==============================
+    // ================= SHOW ERROR =================
+    function showError(field, message) {
+        if (field === "confirm_password") field = "confirm-password";
+        const el = document.getElementById("error-" + field);
+        if (el) el.innerText = message;
+    }
+
+    // ================= LOAD TỈNH =================
     fetch("includes/getProvinces.php")
         .then(res => res.json())
         .then(data => {
-            citySelect.innerHTML = "<option value=''>Chọn Tỉnh / Thành phố</option>";
-            data.forEach(city => {
-                const option = new Option(city.provinceName, city.provinceID);
+
+            citySelect.innerHTML =
+                "<option value=''>Chọn Tỉnh / Thành phố</option>";
+
+            data.forEach(item => {
+
+                const name = item.provinceName || item.name;
+                const id   = item.provinceID || item.id;
+
+                const option = new Option(name, id);
+                option.dataset.name = name;
+
                 citySelect.add(option);
             });
-        })
-        .catch(err => {
-            console.error("Lỗi tải tỉnh:", err);
         });
 
-    // ==============================
-    // LOAD PHƯỜNG
-    // ==============================
+    // ================= CHỌN TỈNH =================
     citySelect.addEventListener("change", function () {
-        const provinceID = citySelect.value;
 
-        cityNameHidden.value = citySelect.options[citySelect.selectedIndex]?.text || "";
+        const selectedOption = this.options[this.selectedIndex];
 
-        wardSelect.innerHTML = "<option value=''>Chọn Phường / Xã</option>";
+        // ⭐ LƯU TÊN
+        cityNameHidden.value = selectedOption?.dataset.name || "";
+
+        // Reset phường
+        wardSelect.innerHTML =
+            "<option value=''>Chọn Phường / Xã</option>";
+
         wardNameHidden.value = "";
 
-        if (provinceID) {
-            fetch(`includes/getWard.php?provinceID=${provinceID}`)
-                .then(res => res.json())
-                .then(wards => {
-                    wards.forEach(ward => {
-                        const option = new Option(ward.wardName, ward.wardID);
-                        wardSelect.add(option);
-                    });
-                })
-                .catch(err => {
-                    console.error("Lỗi tải phường:", err);
+        const provinceID = this.value;
+        if (!provinceID) return;
+
+        fetch(`includes/getWard.php?provinceID=${provinceID}`)
+            .then(res => res.json())
+            .then(data => {
+
+                data.forEach(item => {
+
+                    const name = item.wardName || item.name;
+                    const id   = item.wardID || item.id;
+
+                    const option = new Option(name, id);
+                    option.dataset.name = name;
+
+                    wardSelect.add(option);
                 });
-        }
+            });
     });
 
+    // ================= CHỌN PHƯỜNG =================
     wardSelect.addEventListener("change", function () {
-        wardNameHidden.value = wardSelect.options[wardSelect.selectedIndex]?.text || "";
+
+        const selectedOption = this.options[this.selectedIndex];
+
+        // ⭐ LƯU TÊN
+        wardNameHidden.value = selectedOption?.dataset.name || "";
     });
 
-    // ==============================
-    // SUBMIT FORM
-    // ==============================
+    // ================= SUBMIT =================
     form.addEventListener("submit", function (e) {
+
         e.preventDefault();
 
+        // ❌ KHÔNG reset select
+
         // Xóa lỗi cũ
-        document.querySelectorAll(".error").forEach(e => e.innerText = "");
+        document.querySelectorAll(".error")
+            .forEach(el => el.innerText = "");
 
-        const usernameInput = document.getElementById("registerUsername");
-        const usernameValue = usernameInput?.value?.trim() || "";
+        // ⭐ ÉP LƯU TÊN TRƯỚC KHI GỬI
+        const cityOption =
+            citySelect.options[citySelect.selectedIndex];
 
-        // Check username chứa link
-        const urlPattern = /\b((http|https):\/\/|www\.)[^\s]+|[^\s]+\.(com|net|org|vn|info|biz|edu)(\b|\/)/i;
-        if (urlPattern.test(usernameValue)) {
-            document.getElementById("error-username").innerText = "Tên đăng nhập không được chứa liên kết.";
-            usernameInput.focus();
-            return;
-        }
+        const wardOption =
+            wardSelect.options[wardSelect.selectedIndex];
 
-        // Gán tên tỉnh/xã
-        cityNameHidden.value = citySelect.options[citySelect.selectedIndex]?.text || "";
-        wardNameHidden.value = wardSelect.options[wardSelect.selectedIndex]?.text || "";
+        cityNameHidden.value =
+            cityOption?.dataset.name || "";
+
+        wardNameHidden.value =
+            wardOption?.dataset.name || "";
+
+        // ⭐ XÓA NAME CỦA SELECT → KHÔNG GỬI ID
+        citySelect.removeAttribute("name");
+        wardSelect.removeAttribute("name");
 
         const formData = new FormData(form);
 
@@ -85,45 +113,25 @@ document.addEventListener("DOMContentLoaded", function () {
             method: "POST",
             body: formData
         })
-        .then(res => res.text()) // 🔥 dùng text để debug an toàn
-        .then(text => {
-            try {
-                const data = JSON.parse(text);
+        .then(res => res.json())
+        .then(data => {
 
-                if (data.success) {
-                    alert(data.message);
-                    window.location.href = "login";
-                } else {
-                    // Hiển thị lỗi dưới từng input
-                    for (let field in data.errors) {
-                        const errorDiv = document.getElementById("error-" + field);
-                        if (errorDiv) {
-                            errorDiv.innerText = data.errors[field];
-                        }
-                    }
+            if (data.success) {
+
+                alert(data.message);
+                window.location.href = "login";
+
+            } else {
+
+                // Hiện lỗi nhưng KHÔNG reset select
+                for (let field in data.errors) {
+                    showError(field, data.errors[field]);
                 }
-
-            } catch (err) {
-                console.error("LỖI JSON:", text); // 🔥 in ra lỗi PHP thật
-                alert("Server đang lỗi, xem console!");
             }
         })
         .catch(err => {
-            console.error("Error:", err);
-            alert("Không thể kết nối server.");
-        });
-    });
-
-    // ==============================
-    // HIỆU ỨNG INPUT
-    // ==============================
-    document.querySelectorAll(".input-box input").forEach(input => {
-        input.addEventListener("input", function () {
-            if (this.value.trim() !== "") {
-                this.classList.add("has-content");
-            } else {
-                this.classList.remove("has-content");
-            }
+            console.error(err);
+            showError("general", "Không kết nối server");
         });
     });
 

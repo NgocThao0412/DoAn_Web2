@@ -4,100 +4,92 @@ if (isset($_SESSION['error'])) {
     unset($_SESSION['error']);
 }
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (!isset($showRegister)) {
     $showRegister = false;
 }
 ?>
 
 <div class="wrapper">
-    <div class="form-box register" style="display: <?= $showRegister ? 'block' : 'none' ?>;">
+    <div class="form-box register">
         <h2>Đăng ký</h2>
-        <form id="registerForm" novalidate action="pages/Controllers/register_process.php" method="POST">
 
+        <!-- lỗi chung -->
+        <div class="error" id="error-general"></div>
+
+        <form id="registerForm" novalidate>
+
+            <!-- hidden -->
             <input type="hidden" name="city_name" id="city_name">
             <input type="hidden" name="ward_name" id="ward_name">
 
             <div class="input-infor">
+
                 <div class="left-input">
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
-                        <input id="registerUsername" type="text" name="username" required>
-                        <label>Tên đăng nhập <span style="color:red">*</span></label>
+                        <input id="registerUsername" type="text" name="username">
+                        <label>Tên đăng nhập *</label>
                     </div>
                     <div class="error" id="error-username"></div>
-                    
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
-                        <input id="registerFirstname" type="text" name="fullname" required>
+                        <input id="registerFirstname" type="text" name="fullname">
                         <label>Họ và tên</label>
                     </div>
                     <div class="error" id="error-fullname"></div>
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
-                        <input id="registerEmail" type="email" name="email" required>
+                        <input id="registerEmail" type="email" name="email">
                         <label>Email</label>
                     </div>
                     <div class="error" id="error-email"></div>
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="call-outline"></ion-icon></span>
-                        <input id="registerPhone" type="tel" name="phone" required>
-                        <label>Số điện thoại</label>
+                        <input id="registerPhone" type="tel" name="phone">
+                        <label>SĐT</label>
                     </div>
                     <div class="error" id="error-phone"></div>
-
                 </div>
 
                 <div class="right-input">
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="location-outline"></ion-icon></span>
-                        <input id="registerAddress" type="text" name="street" required>
-                        <label>Địa chỉ (Số nhà, đường)</label>
+                        <input id="registerAddress" type="text" name="street">
+                        <label>Địa chỉ</label>
                     </div>
                     <div class="error" id="error-street"></div>
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="business-outline"></ion-icon></span>
-                        <select id="registerCity" name="city_name" required>
+                        <select id="registerCity" name="city_id">
                             <option value="">Chọn Tỉnh / Thành phố</option>
                         </select>
                     </div>
                     <div class="error" id="error-city"></div>
-                    
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="home-outline"></ion-icon></span>
-                        <select id="registerWard" name="ward_name" required>
+                        <select id="registerWard" name="ward_id">
                             <option value="">Chọn Phường / Xã</option>
                         </select>
                     </div>
                     <div class="error" id="error-ward"></div>
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
-                        <input id="registerPassword" type="password" name="password" required>
+                        <input id="registerPassword" type="password" name="password">
                         <label>Mật khẩu</label>
                     </div>
                     <div class="error" id="error-password"></div>
 
                     <div class="input-box">
-                        <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
-                        <input id="registerConfirmPassword" type="password" name="confirm_password" required>
+                        <input id="registerConfirmPassword" type="password" name="confirm_password">
                         <label>Xác nhận mật khẩu</label>
                     </div>
-                    <div class="error" id="error-confirm-password"></div>
-                    
+                    <div class="error" id="error-confirm_password"></div>
                 </div>
+
             </div>
 
-            <button type="submit" class="btn">Đăng ký</button>
-
-            <div class="login-register">
-                <p>Đã có tài khoản? <a href="login" class="login-link">Đăng nhập</a></p>
-            </div>
-
+            <button type="submit">Đăng ký</button>
         </form>
     </div>
 </div>

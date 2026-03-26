@@ -18,7 +18,7 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
     $username = htmlspecialchars($_SESSION['user']['username'] ?? 'Guest');
     $authButtons = '
         <div class="user-menu">
-             <button id="user-btn" class="btnLogin-popup" onclick="window.location.href=\'index.php?page=profile\'">' . $username . '</button>
+             <button id="user-btn" class="btnLogin-popup" onclick="window.location.href=\'profile\'">' . $username . '</button>
             <form action="pages/Controllers/logout.php" method="POST" style="display: inline;">
                 <button type="submit" class="btnLogout-popup">Đăng xuất</button>
             </form>

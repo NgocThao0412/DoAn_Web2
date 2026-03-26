@@ -144,14 +144,19 @@ $city = htmlspecialchars($user['city'] ?? '');
         </div>
 
         <div>
-            <label>Phường/Xã:</label>
-            <input type="text" name="ward" value="<?php echo htmlspecialchars($user['ward'] ?? ''); ?>">
+
+        <label>Thành phố:</label>
+        <select id="editCity"></select>
         </div>
 
         <div>
-            <label>Thành phố:</label>
-            <input type="text" name="city" value="<?php echo htmlspecialchars($user['city'] ?? ''); ?>">
-        </div>
+        <label>Phường/Xã:</label>
+       <select id="editWard"></select>
+     </div>
+
+       <!-- hidden gửi tên -->
+    <input type="hidden" name="city" id="editCityName">
+    <input type="hidden" name="ward" id="editWardName">
 
         <div>
             <label>Mật khẩu mới:</label>

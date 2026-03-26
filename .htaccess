@@ -13,7 +13,7 @@ RewriteRule ^$ index.php?pages=home [QSA,L]
 
 # Các trang người dùng
 RewriteCond %{REQUEST_URI} !^/index\.php$
-RewriteRule ^(home|about|receipt|login|register|advance|croissant|Macaron|Drink|product|pay|order|import-list|import-add|add-category|order-manager|order-detail)$ index.php?page=$1 [QSA,L]
+RewriteRule ^(home|about|receipt|login|register|advance|croissant|Macaron|Drink|product|pay|order|import-list|import-add|add-category|order-manager|order-detail|profile)$ index.php?page=$1 [QSA,L]
 
 # ✅ Truy cập /app/admin → tự động vào trang login
 RewriteRule ^app/admin/?$ app/admin/index.php [L]
