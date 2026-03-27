@@ -203,7 +203,7 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
                 e.preventDefault();
                 if (advancedFilters.style.display === 'none') {
                     advancedFilters.style.display = 'block';
-                    toggleBtn.textContent = 'ẨN TÌM KIẾM NÂNG CAO';
+                    toggleBtn.textContent = 'TÌM KIẾM NÂNG CAO';
                 } else {
                     advancedFilters.style.display = 'none';
                     toggleBtn.textContent = 'TÌM KIẾM NÂNG CAO';

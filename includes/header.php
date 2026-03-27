@@ -94,7 +94,7 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
                 advButton.addEventListener('click', function () {
                     advFields.classList.toggle('active');
                     if (advFields.classList.contains('active')) {
-                        advButton.textContent = 'ẨN TÌM KIẾM NÂNG CAO';
+                        advButton.textContent = 'TÌM KIẾM NÂNG CAO';
                     } else {
                         advButton.textContent = 'TÌM KIẾM NÂNG CAO';
                     }
