@@ -89,7 +89,7 @@ if (!isset($showRegister)) {
 
             </div>
 
-            <button type="submit">Đăng ký</button>
+            <button type="submit" class="btn" >Đăng ký</button>
         </form>
     </div>
 </div>
