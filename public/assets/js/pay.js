@@ -168,10 +168,10 @@ paymentRadios.forEach(radio => {
 updatePaymentView();
      
      // Ẩn tất cả các phương thức thanh toán khi tải trang
-     window.addEventListener('load', () => {
-        Momo.classList.remove('show');
-        VNPay.classList.remove('show');
- });
+    window.addEventListener('load', () => {
+    momoFields.classList.remove('show');
+    vnpayFields.classList.remove('show');
+});
     
     // Lấy ngày hôm nay và định dạng lại theo định dạng yyyy-mm-dd
     var today = new Date();

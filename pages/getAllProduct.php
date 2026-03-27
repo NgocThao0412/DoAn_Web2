@@ -24,7 +24,7 @@ $term = '%' . $term . '%';
 // 🔥 SQL
 $sql = "SELECT product_id, name AS product_name, selling_price AS price, image, category_id
         FROM products
-        WHERE name COLLATE utf8mb4_general_ci LIKE ?
+        WHERE name LIKE ?
         AND status = 'AVAILABLE'";
 
 // 🔥 Prepare
