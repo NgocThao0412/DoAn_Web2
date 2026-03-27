@@ -38,7 +38,7 @@ function displayWelcomeMessage() {
             const message = document.getElementById("message");
 
             // Hiển thị lời chào cá nhân hóa dựa trên dữ liệu từ session.php
-            message.innerHTML = `Welcome back, ${data.username}!<br>Have a good day!`;
+            message.innerHTML = `Xin chào, ${data.username}`;
             notificate.classList.add("show");
 
             // Sau 2 giây, ẩn thông báo với hiệu ứng chuyển động
@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     cartContent.innerHTML = `
                         <div class="emptyCart">
                             <div class="close-icon"> <ion-icon name="alert-circle-outline"></ion-icon> </div>
-                            <p class="empty-cart">Your cart is empty.</p>
+                            <p class="empty-cart">Không có sản phẩm trong giỏ </p>
                         </div>
                     `;
                 }
