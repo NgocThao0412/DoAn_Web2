@@ -1,5 +1,5 @@
 <form id="add-category-form" action="../../Controllers/add-category-process.php" method="post">
-    
+
     <div class="top-actions" style="margin: 10px 20px 20px 20px; display: flex; justify-content: flex-start;">
         <button type="button" id="btn-show-list" style="background: #4e499e; color: white; display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">
             <ion-icon name="list-outline"></ion-icon>
@@ -20,7 +20,7 @@
                     <input type="text" name="cat_name" id="cat_name" placeholder="Ví dụ: Bánh kem, Kẹo..." required>
                 </div>
             </div>
-            
+
             <div class="status" style="width: 33%;">
                 <div class="product-head">Trạng thái</div>
                 <div class="product-items">
@@ -57,4 +57,5 @@
             <button class="close" type="reset">Đóng</button>
         </div>
     </div>
+
 </form>

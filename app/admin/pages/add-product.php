@@ -24,10 +24,8 @@
         <div class="left-screen">
             <?php include ("../includes/header.php"); ?>
             <div class="blur-overlay"></div>
-            <!--Edit for Home-->
             <div class="Home">
                 <div class="text-big">Thêm sản phẩm</div>
-                <!-- include file dưới này -->
                 <?php include ("../Views/products/add.php");?>
             </div>
         </div>

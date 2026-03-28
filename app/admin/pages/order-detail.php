@@ -1,11 +1,9 @@
 <?php 
-// 1. Kiểm tra session và kết nối DB
-include '../Api_php/check-session-admin.php'; // Đường dẫn từ pages/ ra Api_php
-include '../../config/data_connect.php';     // Đường dẫn từ pages/ ra config
+include '../Api_php/check-session-admin.php';
+include '../../config/data_connect.php';
 
 $order_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// 2. Lấy thông tin đơn hàng (Khớp với trường dữ liệu ERD)
 $order_query = $conn->query("SELECT * FROM orders WHERE order_id = $order_id");
 $order = $order_query->fetch_assoc();
 
@@ -14,7 +12,6 @@ if (!$order) {
     exit;
 }
 
-// 3. Lấy chi tiết sản phẩm (Lưu ý: Đã thêm od.unit vào SELECT theo yêu cầu ERD)
 $details = $conn->query("SELECT od.*, p.name, p.image 
                          FROM order_detail od 
                          JOIN products p ON od.product_id = p.product_id 
@@ -54,18 +51,17 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                     <div style="text-align: right;">
                         <p><strong>Ngày đặt:</strong> <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></p>
                         <p><strong>Trạng thái:</strong> 
-                        <?php 
-                            // CHUYỂN TRẠNG THÁI SANG TIẾNG VIỆT
-                            $status_list = [
-                                'PENDING' => 'Chờ xử lý', 
-                                'PROCESSING' => 'Đang xử lý', 
-                                'COMPLETED' => 'Hoàn thành'
-                            ];
-                            $status_text = $status_list[$order['order_status']] ?? $order['order_status'];
-                            // Đặt màu sắc trực quan
-                            $status_color = ($order['order_status'] == 'COMPLETED') ? 'green' : (($order['order_status'] == 'PROCESSING') ? 'orange' : 'red');
-                        ?>
-                        <span style="font-weight:bold; color:<?= $status_color ?>;"><?= $status_text ?></span></p>
+                            <?php 
+                                $status_list = [
+                                    'PENDING' => 'Chờ xử lý', 
+                                    'PROCESSING' => 'Đang xử lý', 
+                                    'COMPLETED' => 'Hoàn thành'
+                                ];
+                                $status_text = $status_list[$order['order_status']] ?? $order['order_status'];
+                                $status_color = ($order['order_status'] == 'COMPLETED') ? 'green' : (($order['order_status'] == 'PROCESSING') ? 'orange' : 'red');
+                            ?>
+                            <span style="font-weight:bold; color:<?= $status_color ?>;"><?= $status_text ?></span>
+                        </p>
                     </div>
                 </div>
 
@@ -73,7 +69,8 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                     <div class="order-grid-header" style="grid-template-columns: 1fr 2.5fr 1fr 1fr 1fr 1.5fr; background: #EF99B4; color: #455265; padding: 12px; border-radius: 12px 12px 0 0; text-align: center; font-weight: bold;">
                         <div>ẢNH</div>
                         <div style="text-align: left; padding-left: 10px;">SẢN PHẨM</div>
-                        <div>ĐƠN VỊ TÍNH</div> <div>GIÁ</div>
+                        <div>ĐƠN VỊ TÍNH</div> 
+                        <div>GIÁ</div>
                         <div>SỐ LƯỢNG</div>
                         <div>THÀNH TIỀN</div>
                     </div>
@@ -86,14 +83,14 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                                 </div>
                                 <div style="text-align:left; font-weight: bold; padding-left: 10px;">
                                     <?= htmlspecialchars($row['name']) ?>
-                                
                                 </div>
                                 <div style="color: #666; font-size: 0.9em;"><?= htmlspecialchars($row['unit']) ?></div> 
                                 <div><?= number_format($row['price']) ?>đ</div>
                                 <div style="font-weight: bold;">x<?= $row['quantity'] ?></div>
                                 <div style="font-weight:bold; color:#d32f2f; font-size: 1.1em;"><?= number_format($row['price'] * $row['quantity']) ?>đ</div>
                             </div>
-                        <?php endwhile; ?> <?php else: ?>
+                        <?php endwhile; ?> 
+                    <?php else: ?>
                         <div style="text-align: center; padding: 30px; color: #666;">Không có dữ liệu sản phẩm.</div>
                     <?php endif; ?>
                     

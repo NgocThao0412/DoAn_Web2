@@ -10,7 +10,6 @@ if ($from != '') $sql .= " AND created_at >= '$from 00:00:00'";
 if ($to != '')   $sql .= " AND created_at <= '$to 23:59:59'";
 if ($status != '') $sql .= " AND order_status = '$status'";
 
-// YÊU CẦU: Sắp xếp theo phường (shipping_ward)
 $sql .= " ORDER BY shipping_ward ASC, created_at DESC";
 $result = $conn->query($sql);
 ?>

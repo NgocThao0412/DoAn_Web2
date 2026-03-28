@@ -3,7 +3,7 @@ include '../../config/data_connect.php';
 
 if (isset($_POST['id']) && isset($_POST['current_status'])) {
     $id = intval($_POST['id']);
-    $newStatus = ($_POST['current_status'] == 1) ? 0 : 1; // Đảo ngược trạng thái
+    $newStatus = ($_POST['current_status'] == 1) ? 0 : 1;
 
     $sql = "UPDATE category SET status = ? WHERE category_id = ?";
     $stmt = $conn->prepare($sql);
@@ -14,6 +14,8 @@ if (isset($_POST['id']) && isset($_POST['current_status'])) {
     } else {
         echo json_encode(["success" => false, "message" => $conn->error]);
     }
+
+    $stmt->close();
     exit();
 }
 ?>
