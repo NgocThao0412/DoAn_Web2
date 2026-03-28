@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const orderId = this.getAttribute('data-order-id');
             console.log("CLICK ORDER:", orderId);
 
-            fetch(`/banhang/pages/receipt-detail.php?order_id=${orderId}`)
+            fetch(`pages/receipt-detail.php?order_id=${orderId}`)
                 .then(response => response.text())
                 .then(data => {
 
