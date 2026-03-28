@@ -45,7 +45,7 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                     <div>
                         <p><strong>Người nhận:</strong> <?= htmlspecialchars($order['recipient_name']) ?></p>
                         <p><strong>Điện thoại:</strong> <?= htmlspecialchars($order['recipient_phone']) ?></p>
-                        <p><strong>Địa chỉ:</strong> <?= htmlspecialchars($order['shipping_street']) ?>, <?= htmlspecialchars($order['shipping_ward']) ?>, <?= htmlspecialchars($order['shipping_district']) ?>, <?= htmlspecialchars($order['shipping_city']) ?></p>
+                        <p><strong>Địa chỉ:</strong> <?= htmlspecialchars($order['shipping_street']) ?>, <?= htmlspecialchars($order['shipping_ward']) ?>, <?= htmlspecialchars($order['shipping_city']) ?></p>
                         <p><strong>Ghi chú:</strong> <span style="color: #666; font-style: italic;"><?= htmlspecialchars($order['notes']) ?: 'Không có ghi chú' ?></span></p>
                     </div>
                     <div style="text-align: right;">

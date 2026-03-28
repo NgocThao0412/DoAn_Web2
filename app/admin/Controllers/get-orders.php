@@ -30,8 +30,7 @@ $result = $conn->query($sql);
                 <div>#<?= $row['order_id'] ?></div>
                 <div><?= date('d/m/Y', strtotime($row['created_at'])) ?></div>
                 <div style="font-size: 13px;">
-                    <strong><?= htmlspecialchars($row['shipping_ward']) ?></strong> /<br>
-                    <small><?= htmlspecialchars($row['shipping_district']) ?></small>
+                    <strong><?= htmlspecialchars($row['shipping_ward']) ?></strong><br>
                 </div>
                 <div style="color:#d32f2f; font-weight:bold;"><?= number_format($row['total_amount']) ?>đ</div>
                 <div>
