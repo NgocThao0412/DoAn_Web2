@@ -97,10 +97,7 @@ if (empty($products)) {
 
 </div>
 <?php endforeach; ?>
-
-<div class="cart-total">
-    <p style="color: #ffd1d1;">Hóa đơn</p>
-    <span class="total-amount">
-        <?= number_format($total_price, 0, ",", ".") ?> VND
-    </span>
+<div class="cart-footer">
+    <p class="cart-title">Hóa đơn</p>
+    <span class="total-amount"><?= number_format($total_price, 0, ",", ".") ?> VND</span>
 </div>
