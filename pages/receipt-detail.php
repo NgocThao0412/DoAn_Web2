@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
 
     if ($result && $result['order_status'] === 'PENDING') {
 
-        $update_sql = "UPDATE orders SET order_status = 'CANCELLED' WHERE order_id = ?";
+        $update_sql = "UPDATE orders SET order_status = 'COMPLETED' WHERE order_id = ?";
         $stmt = $conn->prepare($update_sql);
         $stmt->bind_param("i", $cancel_id);
 
@@ -81,7 +81,6 @@ $status = strtoupper(trim($order['order_status']));
 
 $statusColor = match($status) {
     'COMPLETED' => 'green',
-    'CANCELLED' => 'red',
     'PROCESSING' => 'deepskyblue',
     'PENDING' => 'orange',
     default => 'black'
@@ -90,7 +89,6 @@ $status_list = [
     'PENDING' => 'Chờ xử lý', 
     'PROCESSING' => 'Đang xử lý', 
     'COMPLETED' => 'Hoàn thành',
-    'CANCELLED' => 'Đã hủy'
 ];
 
 $payment_list = [

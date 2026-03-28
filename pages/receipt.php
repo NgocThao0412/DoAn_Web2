@@ -58,7 +58,7 @@ $status_list = [
                     <div class="text"><p><?= number_format($row['total_amount'], 0, ',', '.') ?> VND</p></div>
                     <div class="text">
                         <p style="color: 
-                           <?= $row['order_status'] == 'CANCELLED' ? 'red' : 
+                           <?= 
                               ($row['order_status'] == 'COMPLETED' ? 'green' : 
                               ($row['order_status'] == 'PROCESSING' ? 'blue' : 'orange')) ?>">
         
@@ -66,13 +66,13 @@ $status_list = [
                         </p>
                     </div>
                     <div class="text">
-                    <?php if ($row['order_status'] !== 'CANCELLED'): ?>
-                         <button class="choose" data-order-id="<?= $row['order_id'] ?>">
-                           Xem thêm
-                         </button>
-                    <?php else: ?>
-                    <span style="color:red;">Đã hủy</span>
-                     <?php endif; ?>
+                    <?php if ($row['order_status'] !== 'COMPLETED'): ?>
+    <button class="choose" data-order-id="<?= $row['order_id'] ?>">
+        Xem thêm
+    </button>
+<?php else: ?>
+    <span style="color:green;">Hoàn thành</span>
+<?php endif; ?>
                     </div>
                 </div>
             <?php endwhile; ?>
