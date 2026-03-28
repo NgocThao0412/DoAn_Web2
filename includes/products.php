@@ -17,28 +17,74 @@ $types = '';
 
 // Nếu có từ khóa, thêm điều kiện LIKE
 if ($term !== '') {
-    $term_sql = " AND name LIKE ? ";
+    $term_sql = " AND p.name LIKE ? ";
     $params[] = "%" . $term . "%";
     $types .= 's';
 }
 
+// Lấy category từ DB để tránh hardcode
+$categories = [];
+$categoryById = [];
+$categorySlugToId = [];
+
+$catStmt = $conn->prepare("SELECT category_id, name FROM category WHERE status = 1");
+if ($catStmt) {
+    $catStmt->execute();
+    $catResult = $catStmt->get_result();
+    while ($catRow = $catResult->fetch_assoc()) {
+        $catId = (int)$catRow['category_id'];
+        $catName = trim($catRow['name']);
+        $categories[] = ['id' => $catId, 'name' => $catName];
+        $categoryById[$catId] = $catName;
+
+        $slug = slugifyCategory($catName);
+        if ($slug === '') {
+            $slug = 'cat-' . $catId;
+        }
+        $categorySlugToId[$slug] = $catId;
+        $categorySlugToId[$catId] = $catId;
+        $categorySlugToId[strtolower($catName)] = $catId;
+        $categorySlugToId[mb_strtolower($catName, 'UTF-8')] = $catId;
+    }
+    $catStmt->close();
+}
+
+function slugifyCategory($text) {
+    // Giữ unicode để tránh lỗi iconv với tiếng Việt
+    $text = mb_strtolower(trim($text), 'UTF-8');
+    // Thay mọi ký tự không phải chữ/nguyên/một số chữ số thành dấu '-'
+    $text = preg_replace('/[^\p{L}\p{Nd}]+/u', '-', $text);
+    $text = trim($text, '-');
+    return $text ?: 'all';
+}
+
 // Lấy category (ưu tiên category, fallback searchCategory, mặc định all)
 $category = 'all';
+$categoryId = 0;
+$categorySlug = 'all';
+
 if (!empty($_GET['category'])) {
     $category = trim($_GET['category']);
 } elseif (!empty($_GET['searchCategory'])) {
     $category = trim($_GET['searchCategory']);
 }
 
-$category = strtolower($category);
-$categoryAliases = [
-    'macaron' => 'macaron',
-    'croissant' => 'croissant',
-    'cross' => 'croissant',
-    'drink' => 'drink',
-    'all' => 'all',
-];
-$category = $categoryAliases[$category] ?? 'all';
+if (is_numeric($category) && isset($categoryById[(int)$category])) {
+    $categoryId = (int)$category;
+    $categorySlug = slugifyCategory($categoryById[$categoryId]);
+    $category = $categorySlug;
+} else {
+    $categoryKey = strtolower(trim($category));
+    if (isset($categorySlugToId[$categoryKey])) {
+        $categoryId = (int)$categorySlugToId[$categoryKey];
+        $categorySlug = slugifyCategory($categoryById[$categoryId]);
+        $category = $categorySlug;
+    } else {
+        $category = 'all';
+        $categoryId = 0;
+        $categorySlug = 'all';
+    }
+}
 
 // Lấy min/max price (tìm kiếm nâng cao)
 $minPrice = (isset($_GET['minPrice']) && is_numeric($_GET['minPrice']) && $_GET['minPrice'] >= 0)
@@ -46,18 +92,11 @@ $minPrice = (isset($_GET['minPrice']) && is_numeric($_GET['minPrice']) && $_GET[
 $maxPrice = (isset($_GET['maxPrice']) && is_numeric($_GET['maxPrice']) && $_GET['maxPrice'] >= 0)
     ? (int)$_GET['maxPrice'] : '';
 
-// Map tên category sang id
-$category_map_reverse = [
-    'macaron' => 1,
-    'croissant' => 2,
-    'drink' => 3,
-];
-
 // Điều kiện lọc category
 $category_sql = '';
-if ($category !== 'all' && isset($category_map_reverse[$category])) {
-    $category_sql = " AND category_id = ? ";
-    $params[] = $category_map_reverse[$category];
+if ($categoryId > 0) {
+    $category_sql = " AND p.category_id = ? ";
+    $params[] = $categoryId;
     $types .= 'i';
 }
 
@@ -81,8 +120,9 @@ $offset       = ($currentPage - 1) * $itemsPerPage;
 
 // Đếm tổng sản phẩm
 $countSql = "SELECT COUNT(*) AS total 
-             FROM products 
-             WHERE status = 'AVAILABLE' 
+             FROM products p 
+             JOIN category c ON p.category_id = c.category_id 
+             WHERE p.status = 'AVAILABLE' AND c.status = 1 
              $term_sql $category_sql $price_sql";
 
 $stmtCount = $conn->prepare($countSql);
@@ -105,9 +145,10 @@ $stmtCount->close();
 
 $totalPages = ceil($totalProducts / $itemsPerPage);
 // Lấy sản phẩm
-$sql = "SELECT product_id, name, selling_price, image, category_id, status
-        FROM products
-        WHERE status = 'AVAILABLE'
+$sql = "SELECT p.product_id, p.name, p.selling_price, p.image, p.category_id, p.status
+        FROM products p
+        JOIN category c ON p.category_id = c.category_id
+        WHERE p.status = 'AVAILABLE' AND c.status = 1
         $term_sql $category_sql $price_sql
         LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($sql);
@@ -124,16 +165,12 @@ if ($types !== '') {
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Map category id sang tên
-$category_map = [
-    1 => "macaron",
-    2 => "croissant",
-    3 => "drink"
-];
-
+// Map category id sang tên + slug (từ DB)
 $productsAll = [];
 while ($row = $result->fetch_assoc()) {
-    $row['category'] = $category_map[$row['category_id']] ?? 'other';
+    $catName = $categoryById[$row['category_id']] ?? 'Other';
+    $row['category'] = slugifyCategory($catName);
+    $row['category_name'] = $catName;
     $productsAll[] = $row;
 }
 
@@ -176,9 +213,12 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
             
             <select name="searchCategory" class="search-criteria">
                 <option value="all"<?= $category === 'all' ? ' selected' : '' ?>>Tất cả danh mục</option>
-                <option value="macaron"<?= $category === 'macaron' ? ' selected' : '' ?>>Macaron</option>
-                <option value="croissant"<?= $category === 'croissant' ? ' selected' : '' ?>>Croissant</option>
-                <option value="drink"<?= $category === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
+                <?php foreach ($categories as $cat):
+                    $catSlug = slugifyCategory($cat['name']);
+                    $isSelected = ($category === $catSlug) ? ' selected' : '';
+                ?>
+                    <option value="<?= htmlspecialchars($catSlug) ?>"<?= $isSelected ?>><?= htmlspecialchars($cat['name']) ?></option>
+                <?php endforeach; ?>
             </select>
             
             <input type="number" min="0" name="minPrice" class="search-criteria" 
@@ -279,9 +319,11 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
         <!-- Filter category -->
         <div class="category-filters" style="display: none;">
             <a href="index.php?page=home&p=1&term=<?= urlencode($term) ?>&category=all" class="<?= isActiveCategory($category, 'all') ?>">All</a>
-            <a href="index.php?page=home&p=1&term=<?= urlencode($term) ?>&category=macaron" class="<?= isActiveCategory($category, 'macaron') ?>">Macaron</a>
-            <a href="index.php?page=home&p=1&term=<?= urlencode($term) ?>&category=croissant" class="<?= isActiveCategory($category, 'croissant') ?>">Croissant</a>
-            <a href="index.php?page=home&p=1&term=<?= urlencode($term) ?>&category=drink" class="<?= isActiveCategory($category, 'drink') ?>">Drink</a>
+            <?php foreach ($categories as $cat):
+                $catSlug = slugifyCategory($cat['name']);
+            ?>
+                <a href="index.php?page=home&p=1&term=<?= urlencode($term) ?>&category=<?= urlencode($catSlug) ?>" class="<?= isActiveCategory($category, $catSlug) ?>"><?= htmlspecialchars($cat['name']) ?></a>
+            <?php endforeach; ?>
         </div>
 
         <!-- Navigation (bạn có thể dùng hoặc bỏ nếu không dùng) -->
@@ -289,30 +331,22 @@ $isAdvancePage = isset($_GET['page']) && $_GET['page'] === 'advance';
             <nav class="nav-container">
             <ul class="nav-links">
             <li>
-                <a class="nav-item <?= isActiveCategory($category, 'all') ?>" href="home">
-                   Tất cả
+                <a class="nav-item <?= isActiveCategory($category, 'all') ?>" href="index.php?page=home&p=1&term=&category=all">
+                   Tất cả 
                 </a>
             </li>
-            <li>/</li>
-            <li>
-                <a class="nav-item <?= isActiveCategory($category, 'macaron') ?>" href="Macaron">
-                   Macaron
-                </a>
-
-            </li>
-            <li>/</li>
-            <li>
-                <a class="nav-item <?= isActiveCategory($category, 'croissant') ?>" href="croissant">
-                   Bánh Sừng Bò
-                </a>
-                
-            </li>
-            <li>/</li>
-            <li>
-              <a class="nav-item <?= isActiveCategory($category, 'drink') ?>" href="Drink">
-                   Đồ Uống
-                </a>
-            </li>
+            <li> /</li>
+            <?php foreach ($categories as $idx => $cat):
+                $catSlug = slugifyCategory($cat['name']);
+                if ($idx > 0): ?>
+                    <li>/</li>
+                <?php endif; ?>
+                <li>
+                    <a class="nav-item <?= isActiveCategory($category, $catSlug) ?>" href="index.php?page=home&p=1&category=<?= urlencode($catSlug) ?>">
+                        <?= htmlspecialchars($cat['name']) ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
         </ul>
 </nav>
         <?php else: ?>
