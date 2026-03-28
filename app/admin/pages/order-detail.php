@@ -85,9 +85,9 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                                     <?= htmlspecialchars($row['name']) ?>
                                 </div>
                                 <div style="color: #666; font-size: 0.9em;"><?= htmlspecialchars($row['unit']) ?></div> 
-                                <div><?= number_format($row['price']) ?>đ</div>
+                                <div><?= number_format($row['price']) ?> VND</div>
                                 <div style="font-weight: bold;">x<?= $row['quantity'] ?></div>
-                                <div style="font-weight:bold; color:#d32f2f; font-size: 1.1em;"><?= number_format($row['price'] * $row['quantity']) ?>đ</div>
+                                <div style="font-weight:bold; color:#d32f2f; font-size: 1.1em;"><?= number_format($row['price'] * $row['quantity']) ?> VND</div>
                             </div>
                         <?php endwhile; ?> 
                     <?php else: ?>
@@ -95,7 +95,7 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                     <?php endif; ?>
                     
                     <div style="text-align:right; padding:25px; font-size:1.6em; font-weight:bold;">
-                        TỔNG CỘNG: <span style="color:#d32f2f;"><?= number_format($order['total_amount']) ?>đ</span>
+                        TỔNG CỘNG: <span style="color:#d32f2f;"><?= number_format($order['total_amount']) ?> VND</span>
                     </div>
                 </div>
             </div>
