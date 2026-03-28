@@ -179,7 +179,7 @@ $total_cost = 0;
                 name="product_note[<?= $row['product_id'] ?>]"
                 id="note_<?= $row['product_id'] ?>"
                 value="<?= htmlspecialchars($row['note'] ?? '') ?>"
-                placeholder="Enter message for this product">
+                placeholder="Ghi chú cho sản phẩm">
         </div>
     </div>
 <?php } ?>
