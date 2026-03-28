@@ -190,7 +190,7 @@ $result = $conn->query($sql);
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="10">No orders found matching your criteria.</td></tr>
+            <tr><td colspan="10">Không tìm thấy đơn hàng nào phù hợp với tiêu chí của bạn..</td></tr>
         <?php endif; ?>
     </tbody>
 </table>
@@ -501,14 +501,14 @@ $result = $conn->query($sql);
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="10">No orders found matching your criteria.</td></tr>
+            <tr><td colspan="10">Không tìm thấy đơn hàng nào phù hợp với tiêu chí của bạn..</td></tr>
         <?php endif; ?>
     </tbody>
 </table>
 
 <div class="overlay" id="overlay"></div>
 <div class="ShowDetail edit-ShowDetailOrder" id="DetailOrders" style="display: none;">
-    <h2>Detail Order</h2>
+    <h2>Chi tiết đơn hàng</h2>
     <div class="id_order">
         <p>ID Order: <strong id="detail_order_id">#ND002</strong></p>
     </div>
@@ -516,35 +516,35 @@ $result = $conn->query($sql);
         <form>
             <div class="form-horizontal">
                 <div class="form-group">
-                    <label for="customer_name">Customer Name:</label>
+                    <label for="customer_name">Tên khách hàng:</label>
                     <input type="text" id="customer_name" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="phone">Phone:</label>
+                    <label for="phone">Số điện thoại:</label>
                     <input type="text" id="phone" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="order_date">Order Date:</label>
+                    <label for="order_date">Ngày đặt hàng:</label>
                     <input type="text" id="order_date" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="delivery_address">Delivery Address:</label>
+                    <label for="delivery_address">Địa chỉ giao hàng:</label>
                     <input type="text" id="delivery_address" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="order_note">Note:</label>
+                    <label for="order_note">ghi chú:</label>
                     <input type="text" id="order_note" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="product_id">Product ID:</label>
+                    <label for="product_id">Mã sản phẩm:</label>
                     <input type="text" id="product_id" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="product_info">Product Info:</label>
+                    <label for="product_info">Thông tin sản phẩm:</label>
                     <div id="product_info" class="product-info-box" readonly></div>
                 </div>
                 <div class="form-group">
-                    <label for="order_status_detail">Order Status:</label> <select id="order_status_detail"></select>
+                    <label for="order_status_detail">Trạng thái đơn hàng:</label> <select id="order_status_detail"></select>
                 </div>
             </div>
             <div class="form-buttons">

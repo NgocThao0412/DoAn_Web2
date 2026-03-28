@@ -56,7 +56,7 @@ if ($loggedIn) {
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
-            <p>No orders found.</p>
+            <p>Không có đơn hàng.</p>
         <?php endif; ?>
     <?php else: ?>
         <p style="text-align: center; color: red;  margin-bottom: 20px; margin-top: 30px;">

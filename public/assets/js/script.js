@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             console.log("Response từ server:", data);
             if (data.success) {
-                alert("Product has been added to the cart!");
+                alert("Đã thêm vào giỏ hàng");
                 fetchCart();
                 updateCartCount();
             } else {
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 fetchCart();
                 updateCartCount();
             } else {
-                alert("Error deleting product: " + data.message);
+                alert("Lỗi xóa sản phẩm: " + data.message);
             }
         })
         .catch(error => console.error("Lỗi khi xóa sản phẩm:", error));
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateCartCount(); // Cập nhật số lượng sản phẩm trên icon giỏ hàng
                 updateTotalPrice(); // Cập nhật tổng tiền ngay lập tức
             } else {
-                alert("An error occurred while updating the cart!");
+                alert("Xảy ra lỗi trong quá trình cập nhật giỏ hàng");
             }
         })
         .catch(error => console.error("Lỗi:", error));
