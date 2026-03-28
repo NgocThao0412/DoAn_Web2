@@ -142,7 +142,7 @@ $total_cost = 0;
 
                 <div class="my-order">
                     <div class="Text-head">
-                        <h1>Your Orders</h1>
+                        <h1>Đơn hàng của bạn</h1>
                     </div>
 
                     <div class="product-list">
@@ -172,7 +172,7 @@ $total_cost = 0;
 
         <div class="note">
             <label for="note_<?= $row['product_id'] ?>">
-                Note for this product
+                Ghi chú cho sản phẩm này:
             </label>
 
             <input type="text"
@@ -193,7 +193,7 @@ $total_cost = 0;
                                 <div class="price"><?= number_format($total_cost, 0, '.', '.') ?> VND</div>
                             </div> -->
                             <div class="total-sum">
-                                <div>Total</div>
+                                <div>Tổng cộng</div>
                                 <div class="price"><?= number_format($total_cost, 0, '.', '.') ?> VND</div>
                             </div>
                         </div>
@@ -204,7 +204,7 @@ $total_cost = 0;
                     </div>
 
                     <div class="pay">
-                        <button type="submit" class="pay-button">Pay</button>
+                        <button type="submit" class="pay-button">Thanh toán</button>
                     </div>
                 </div>
 
@@ -225,7 +225,7 @@ $total_cost = 0;
     <p style="font-size: 14px;">Đơn hàng của bạn đang được giao với tình yêu.</p>
     <!-- <a href="./user-receipt.html" class="back-home">Click here to view the invoice</a> -->
     <a id="view-invoice-link" href="receipt" class="view-invoice-btn">Xem hóa đơn</a>
-    <p>Wishing you the sweetest day!</p>
+    <p>Chúc bạn có một ngày vui vẻ</p>
 </div>
 
 <div class="blur-overlay" id="confirmation-overlay"></div>

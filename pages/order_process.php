@@ -16,7 +16,7 @@ if (
 ) {
     echo json_encode([
         "success" => false,
-        "message" => "Please log in before performing this action."
+        "message" => "Vui lòng đăng nhập trước khi thực hiện thao tác này."
     ]);
     exit;
 }
@@ -96,7 +96,7 @@ while ($row = mysqli_fetch_assoc($cart_query)) {
 if (empty($cart_items)) {
     echo json_encode([
         "success" => false,
-        "message" => "Your cart is empty!"
+        "message" => "Giỏ hàng trống!"
     ]);
     exit;
 }
