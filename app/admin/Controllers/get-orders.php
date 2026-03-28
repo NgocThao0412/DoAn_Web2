@@ -32,7 +32,7 @@ $result = $conn->query($sql);
                 <div style="font-size: 13px;">
                     <strong><?= htmlspecialchars($row['shipping_ward']) ?></strong><br>
                 </div>
-                <div style="color:#d32f2f; font-weight:bold;"><?= number_format($row['total_amount']) ?>đ</div>
+                <div style="color:#d32f2f; font-weight:bold;"><?= number_format($row['total_amount']) ?> VND</div>
                 <div>
                     <select class="order-status-select" onchange="updateStatus(<?= $row['order_id'] ?>, this.value)">
                         <option value="PENDING" <?= ($row['order_status'] == 'PENDING' ? 'selected' : '') ?>>Chờ xử lý</option>
