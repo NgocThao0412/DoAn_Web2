@@ -86,7 +86,7 @@ $details = $conn->query("SELECT od.*, p.name, p.image
                                 </div>
                                 <div style="color: #666; font-size: 0.9em;"><?= htmlspecialchars($row['unit']) ?></div> 
                                 <div><?= number_format($row['price']) ?> VND</div>
-                                <div style="font-weight: bold;">x<?= $row['quantity'] ?></div>
+                                <div style="font-weight: bold;"><?= $row['quantity'] ?></div>
                                 <div style="font-weight:bold; color:#d32f2f; font-size: 1.1em;"><?= number_format($row['price'] * $row['quantity']) ?> VND</div>
                             </div>
                         <?php endwhile; ?> 
