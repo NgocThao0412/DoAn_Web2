@@ -7,7 +7,35 @@ if ($order_id <= 0) {
     echo "<p style='color:red;'>Invalid order ID</p>";
     exit;
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
+    $cancel_id = intval($_POST['cancel_order_id']);
 
+    // Chỉ cho hủy nếu đang PENDING
+    $check_sql = "SELECT order_status FROM orders WHERE order_id = ?";
+    $stmt = $conn->prepare($check_sql);
+    $stmt->bind_param("i", $cancel_id);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    if ($result && $result['order_status'] === 'PENDING') {
+
+        $update_sql = "UPDATE orders SET order_status = 'CANCELLED' WHERE order_id = ?";
+        $stmt = $conn->prepare($update_sql);
+        $stmt->bind_param("i", $cancel_id);
+
+        if ($stmt->execute()) {
+            echo "<script>alert('Hủy đơn thành công');
+                 window.location.href = '../receipt';
+                 </script>";
+            exit;
+        } else {
+            echo "<script>alert('Lỗi khi hủy đơn');</script>";
+        }
+
+    } else {
+        echo "<script>alert('Không thể hủy đơn này');</script>";
+    }
+}
 // ================== LẤY THÔNG TIN ORDER ==================
 $sql_order = "SELECT o.order_id, 
                     DATE_FORMAT(o.order_date, '%Y-%m-%d %H:%i') AS order_date, 
@@ -49,13 +77,28 @@ $stmt->execute();
 $details = $stmt->get_result();
 
 // ================== MÀU STATUS ==================
-$statusColor = match($order['order_status']) {
+$status = strtoupper(trim($order['order_status']));
+
+$statusColor = match($status) {
     'COMPLETED' => 'green',
     'CANCELLED' => 'red',
     'PROCESSING' => 'deepskyblue',
     'PENDING' => 'orange',
     default => 'black'
 };
+$status_list = [
+    'PENDING' => 'Chờ xử lý', 
+    'PROCESSING' => 'Đang xử lý', 
+    'COMPLETED' => 'Hoàn thành',
+    'CANCELLED' => 'Đã hủy'
+];
+
+$payment_list = [
+    'UNPAID' => 'Chưa thanh toán',
+    'PAID' => 'Đã thanh toán',
+    'FAILED' => 'Thất bại'
+];
+
 ?>
 
 <div class="more-infor">
@@ -63,7 +106,7 @@ $statusColor = match($order['order_status']) {
         <ion-icon name="close-outline"></ion-icon>
     </span>
 
-    <div class="big-text more"><p>Đơn hàng #<?= $order_id ?></p></div>
+    <div class="big-text more"><p>Order #<?= $order_id ?></p></div>
 
     <div class="scroll-see">
         <div class="customer-infor">
@@ -74,16 +117,14 @@ $statusColor = match($order['order_status']) {
             <p><strong>Ngày giao hàng:</strong> <?= htmlspecialchars($order['delivery_date']) ?></p>
             <p><strong>Thời gian giao hàng:</strong> <?= htmlspecialchars($order['delivery_time']) ?></p>
             <p><strong>Trạng thái thanh toán:</strong> 
-   <span style="color: <?= trim($order['payment_status']) == 'PAID' ? 'green' : 'red' ?>">
-         <?= trim($order['payment_status']) == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' ?>
-   </span>
-</p> 
+                <?= htmlspecialchars($payment_list[$order['payment_status']] ?? $order['payment_status']) ?>
+            </p>
             <p><strong>Ghi chú:</strong> <?= htmlspecialchars($order['notes']) ?></p>
             <p><strong>Trạng thái:</strong>
-   <span style="color: <?= $statusColor ?>;">
-    <?= trim($order['order_status']) == 'PENDING' ? 'Chờ xử lý' : htmlspecialchars($order['order_status']) ?>
-   </span>
-</p>
+                <span style="color: <?= $statusColor ?>;">
+                    <?= htmlspecialchars($status_list[$order['order_status']] ?? $order['order_status']) ?>
+                </span>
+            </p>
         </div>
 
         <?php 
@@ -113,4 +154,13 @@ $statusColor = match($order['order_status']) {
             <strong>Tổng cộng:</strong> <?= number_format($total, 0, ',', '.') ?> VND
         </p>
     </div>
+    <?php if ($order['order_status'] === 'PENDING'): ?>
+     <form method="POST" action="pages/receipt-detail.php?order_id=<?= $order_id ?>" 
+      onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+      
+     <input type="hidden" name="cancel_order_id" value="<?= $order_id ?>">
+    
+     <button type="submit" class="cancel-button">Hủy đơn hàng</button>
+     </form>
+    <?php endif; ?>
 </div>

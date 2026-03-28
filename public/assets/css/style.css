@@ -830,7 +830,7 @@ header.hide {
     width: 410px;
     height: 100%;
     background-color: #333;
-    padding: 10px 40px;
+    padding: 10px 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: right 0.3s ease;
     z-index: 99;
@@ -859,13 +859,16 @@ header.hide {
     color: #000000;
 }
 
-.cart-scroll{
+.cart-scroll {
     overflow-y: auto;
     height: 75%;
+
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE, Edge cũ */
 }
 
 .cart-scroll::-webkit-scrollbar {
-    width: 0.8px;
+    display: none;               /* Chrome, Safari */
 }
 
 .cart-scroll::-webkit-scrollbar-track {
@@ -2252,7 +2255,29 @@ ul {
     background: #e4b95b;
     border-radius: 10px;
 }
+.cart-footer {
+    position: sticky;
+    bottom: 0;              /* 👈 dính ở dưới */
+    
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
 
+    padding: 15px 0;
+    background: #333;       /* 👈 tránh bị trong suốt */
+    border-top: 1px solid #555;
 
+    z-index: 5;
+}
 
+.cart-title {
+    font-size: 15px;
+    color: #ccc;           /* 👈 dịu hơn cho đẹp */
+}
 
+.total-amount {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f7f7f7;
+}

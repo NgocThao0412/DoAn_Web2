@@ -150,7 +150,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     
-    
+function closeCart() {
+    if (shoppingCart) shoppingCart.classList.remove("active");
+    if (blurOverlay) blurOverlay.classList.remove("active");
+}
+
+if (blurOverlay) {
+    blurOverlay.addEventListener("click", closeCart);
+}
+
+if (shoppingCart) {
+    shoppingCart.addEventListener("click", function (e) {
+        e.stopPropagation();
+    });
+}
 
     // Khi nhấn nút đóng giỏ hàng
     closeBtns.forEach(button => {
@@ -303,12 +316,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // lấy input số lượng
         const quantityEl =
             item.querySelector(".quantity") ||
+            
             item.querySelector("input");
-
-        // ❗ CHẶN NULL TẠI ĐÂY
         if (!priceEl || !quantityEl) return;
 
-        // ❗ CHẶN textContent null
         const priceText = priceEl.textContent;
         if (!priceText) return;
 
@@ -735,7 +746,7 @@ document.querySelector("form").addEventListener("submit", function(e) {
 
     if (minPrice > maxPrice && maxPrice !== 0) {
         e.preventDefault();
-        alert("❌ Giá từ không được lớn hơn giá đến!");
+        alert("Giá từ không được lớn hơn giá đến!");
     }
 });
 document.addEventListener("DOMContentLoaded", function () {
@@ -763,10 +774,10 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
 
             if (errorDiv) {
-                errorDiv.textContent = "❌ Giá từ phải nhỏ hơn hoặc bằng giá đến!";
+                errorDiv.textContent = " Giá từ phải nhỏ hơn hoặc bằng giá đến!";
                 errorDiv.style.display = "block";
             } else {
-                alert("❌ Giá từ phải nhỏ hơn hoặc bằng giá đến!");
+                alert("Giá từ phải nhỏ hơn hoặc bằng giá đến!");
             }
 
             return;
