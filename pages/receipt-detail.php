@@ -63,7 +63,7 @@ $statusColor = match($order['order_status']) {
         <ion-icon name="close-outline"></ion-icon>
     </span>
 
-    <div class="big-text more"><p>Order #<?= $order_id ?></p></div>
+    <div class="big-text more"><p>Đơn hàng #<?= $order_id ?></p></div>
 
     <div class="scroll-see">
         <div class="customer-infor">
@@ -73,13 +73,17 @@ $statusColor = match($order['order_status']) {
             <p><strong>Ngày đặt hàng:</strong> <?= htmlspecialchars($order['order_date']) ?></p>
             <p><strong>Ngày giao hàng:</strong> <?= htmlspecialchars($order['delivery_date']) ?></p>
             <p><strong>Thời gian giao hàng:</strong> <?= htmlspecialchars($order['delivery_time']) ?></p>
-            <p><strong>Trạng thái thanh toán:</strong> <?= htmlspecialchars($order['payment_status']) ?></p>
+            <p><strong>Trạng thái thanh toán:</strong> 
+   <span style="color: <?= trim($order['payment_status']) == 'PAID' ? 'green' : 'red' ?>">
+         <?= trim($order['payment_status']) == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' ?>
+   </span>
+</p> 
             <p><strong>Ghi chú:</strong> <?= htmlspecialchars($order['notes']) ?></p>
             <p><strong>Trạng thái:</strong>
-                <span style="color: <?= $statusColor ?>;">
-                    <?= htmlspecialchars($order['order_status']) ?>
-                </span>
-            </p>
+   <span style="color: <?= $statusColor ?>;">
+    <?= trim($order['order_status']) == 'PENDING' ? 'Chờ xử lý' : htmlspecialchars($order['order_status']) ?>
+   </span>
+</p>
         </div>
 
         <?php 
@@ -106,7 +110,7 @@ $statusColor = match($order['order_status']) {
 
     <div class="total-price">
         <p style="color: red;">
-            <strong>Total Price:</strong> <?= number_format($total, 0, ',', '.') ?> VND
+            <strong>Tổng cộng:</strong> <?= number_format($total, 0, ',', '.') ?> VND
         </p>
     </div>
 </div>

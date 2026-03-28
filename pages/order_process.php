@@ -16,7 +16,7 @@ if (
 ) {
     echo json_encode([
         "success" => false,
-        "message" => "Vui lòng đăng nhập trước khi thực hiện thao tác này."
+        "message" => "Vui lòng đăng nhập trước khi thực hiện thao tác này.."
     ]);
     exit;
 }
@@ -194,7 +194,7 @@ $stmt->close();
 // Trả kết quả về JSON
 echo json_encode([
     "success" => true,
-    "message" => "Đơn hàng đã được đặt thành công!",
+    "message" => "Order placed successfully!",
     "order_id" => $order_id
 ]);
 exit;

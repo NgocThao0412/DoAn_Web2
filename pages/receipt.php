@@ -6,17 +6,17 @@ $loggedIn = isset($_SESSION['user']) && isset($_SESSION['user']['username']);
 if ($loggedIn) {
     $username = $_SESSION['user']['username'];
 
-  $sql = "SELECT 
-            o.order_id, 
-            DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i') AS order_date,
-            o.total_amount, 
-            o.order_status, 
-            (SELECT SUM(od.quantity) 
-             FROM order_detail od 
-             WHERE od.order_id = o.order_id) AS quantity 
-        FROM orders o 
-        WHERE o.username = ? 
-        ORDER BY o.created_at DESC";
+    $sql = "SELECT 
+                o.order_id, 
+                DATE_FORMAT(o.order_date, '%Y-%m-%d %H:%i') AS order_date,
+                o.total_amount, 
+                o.order_status, 
+                (SELECT SUM(od.quantity) 
+                 FROM order_detail od 
+                 WHERE od.order_id = o.order_id) AS quantity 
+            FROM orders o 
+            WHERE o.username = ? 
+            ORDER BY o.order_date DESC";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $username); // ✅ FIX QUAN TRỌNG
@@ -56,7 +56,7 @@ if ($loggedIn) {
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
-            <p>Không có đơn hàng.</p>
+            <p>Không tìm thấy đơn hàng.</p>
         <?php endif; ?>
     <?php else: ?>
         <p style="text-align: center; color: red;  margin-bottom: 20px; margin-top: 30px;">
