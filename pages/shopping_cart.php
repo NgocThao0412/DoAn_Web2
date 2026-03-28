@@ -8,7 +8,7 @@
         
         <div class="Pay_button">
             <a href="pay" class="pay-link">
-                <button class="pay-btn-link">Pay</button>
+                <button class="pay-btn-link">Thanh toán</button>
             </a>
         </div>
     </div>

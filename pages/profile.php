@@ -108,7 +108,7 @@ $city = htmlspecialchars($user['city'] ?? '');
     </div>
 
     <div class="profile-field">
-        <label>Địa chỉ:</label>
+        <label>Đường:</label>
         <span><?php echo $street; ?></span>
     </div>
 
