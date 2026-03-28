@@ -194,7 +194,7 @@ $stmt->close();
 // Trả kết quả về JSON
 echo json_encode([
     "success" => true,
-    "message" => "Order placed successfully!",
+    "message" => "Đơn hàng đã được đặt thành công!",
     "order_id" => $order_id
 ]);
 exit;
