@@ -26,72 +26,60 @@ if ($result->num_rows > 0): ?>
 
         <tbody>
         <?php while($row = $result->fetch_assoc()):
-
             $username = $row['username'];
             $fullname = $row['fullname'];
+            
             // Trạng thái hiển thị
-            $statusText = ($row['status'] === 'locked') ? 'Đã khóa' : 'Hoạt động';
-            // Hành động nút
             $toggleAction = ($row['status'] === 'locked') ? 'Mở khóa' : 'Khóa';
-            // Icon
             $icon = ($row['status'] === 'locked') ? 'lock-closed-outline' : 'lock-open-outline';
+            
             // Kiểm tra admin tự khóa mình
             $isSelf = ($username === $currentUser);
-            $iconColor = ($row['status'] === 'locked') ? 'red' : 'black';
-
+            
+            // Chuẩn bị địa chỉ đầy đủ để hiển thị khi hover (dùng title attribute)
+            $fullAddress = htmlspecialchars($row['street'] . ', ' . $row['ward'] . ', ' . $row['city']);
         ?>
             <tr data-username="<?php echo htmlspecialchars($username); ?>">
                 <td><?php echo htmlspecialchars($username); ?></td>
-                <td class="hide2">
-                    <?php echo htmlspecialchars($fullname); ?>
-                </td>
-                <td class="hide3">
+                <td class="hide2"><?php echo htmlspecialchars($fullname); ?></td>
+                <td class="hide3" title="<?php echo $row['email']; ?>">
                     <?php echo htmlspecialchars($row['email']); ?>
                 </td>
-                <td class="hide4">
+                <td class="hide4" title="<?php echo $row['phone']; ?>">
                     <?php echo htmlspecialchars($row['phone']); ?>
                 </td>
-                <td class="hide5" 
-    style="cursor: pointer; color: #007bff;" 
-    onclick="alert('Địa chỉ đầy đủ: <?php echo htmlspecialchars($row['street'] . ', ' . $row['ward'] . ', ' . $row['city']); ?>')">
-    <?php 
-    $fullAddress = $row['street'] . ', ' . $row['ward'] . ', ' . $row['city'];
-    echo htmlspecialchars(mb_substr($fullAddress, 0, 25)) . '... (Xem thêm)';
-    ?>
-</td>
-                
-                <td>
-                    <?php echo htmlspecialchars($row['role']); ?>
+                <td class="hide5" title="<?php echo $fullAddress; ?>">
+                    <?php echo $fullAddress; ?>
                 </td>
-                <td>
-                    <!-- Nút khóa / mở khóa -->
+                
+                <td><?php echo htmlspecialchars($row['role']); ?></td>
+                
+                <td class="action-buttons">
                     <button 
-                        class="button lock <?php echo $isSelf ? 'disabled' : ''; ?>"
-                        <?php echo $isSelf ? 'disabled' : 
-                        'onclick="toggleLockUser(\'' . $username . '\', \'' . $row['status'] . '\', \'' . $row['role'] . '\')"'; ?>
-
-                        title="<?php 
-                        echo $isSelf 
-                        ? 'Bạn không thể tự khóa tài khoản của mình' 
-                        : $toggleAction . ' người dùng này'; 
-                        ?>">
-                        
-                        <ion-icon 
-                        name="<?php echo $icon; ?>" 
-                        style="color:<?php echo $iconColor; ?>;">
-                        </ion-icon>
-
+                        class="button lock <?php echo ($row['status'] === 'locked') ? 'is-locked' : ''; ?> <?php echo $isSelf ? 'disabled' : ''; ?>"
+                        <?php echo $isSelf ? 'disabled' : 'onclick="toggleLockUser(\'' . $username . '\', \'' . $row['status'] . '\', \'' . $row['role'] . '\')"'; ?>
+                        title="<?php echo $isSelf ? 'Bạn không thể tự khóa mình' : $toggleAction; ?>">
+    
+                        <ion-icon name="<?php echo $icon; ?>"></ion-icon>
+                    </button>
+                    <button class="button reset" 
+                            onclick="confirmResetPassword('<?php echo $username; ?>')" 
+                            title="Khởi tạo lại mật khẩu">
+                        <ion-icon name="key-outline"></ion-icon>
                     </button>
 
-                    <!-- Nút chỉnh sửa -->
-                    <button class="button edit" onclick="editUser('<?php echo $row['username']; ?>')">
-                            <ion-icon name="create-outline" style="color: black;"></ion-icon>
-                        </button>
+                    <button class="button edit" 
+                            onclick="editUser('<?php echo $username; ?>')" 
+                            title="Chỉnh sửa thông tin">
+                        <ion-icon name="create-outline"></ion-icon>
+                    </button>
                 </td>
             </tr>
         <?php endwhile; ?>
         </tbody>
     </table>
 <?php else: ?>
-    <p>Không tìm thấy người dùng nào.</p>
+    <div class="no-data">
+        <p>Không tìm thấy người dùng nào trong hệ thống.</p>
+    </div>
 <?php endif; ?>

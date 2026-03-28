@@ -474,3 +474,60 @@ document.querySelector('.find').addEventListener('input', function () {
         searchUser(); // Khi ô tìm kiếm trống, gọi lại để reset bảng
     }
 });
+
+let pendingResetUsername = null;
+
+// 1. Hiển thị Modal xác nhận Reset mật khẩu
+function confirmResetPassword(username) {
+    pendingResetUsername = username;
+    const modal = document.getElementById('confirmResetModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        // Backup nếu Thảo chưa kịp thêm Modal vào HTML
+        if (confirm(`Bạn có chắc chắn muốn đặt lại mật khẩu cho người dùng "${username}" về mặc định (123456) không?`)) {
+            executeResetPassword(username);
+        }
+    }
+}
+
+// 2. Đóng Modal Reset
+function closeResetModal() {
+    const modal = document.getElementById('confirmResetModal');
+    if (modal) modal.style.display = 'none';
+    pendingResetUsername = null;
+}
+
+// 3. Thực thi gọi API Reset mật khẩu
+function executeResetPassword(username) {
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('action', 'reset_password');
+
+    fetch('Api_php/lock-user.php', { // Thảo có thể dùng chung file lock-user hoặc tạo file mới reset-user.php
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(response => response.text())
+    .then(data => {
+        alert(data); // Hiển thị thông báo "Reset thành công. Mật khẩu mới là..."
+        closeResetModal();
+        loadUserTable(); // Load lại bảng
+    })
+    .catch(error => {
+        console.error("Lỗi Reset mật khẩu:", error);
+        alert("Đã xảy ra lỗi hệ thống.");
+    });
+}
+
+// 4. Gán sự kiện cho nút "Đồng ý" trong Modal Reset
+// Lưu ý: Đảm bảo nút trong HTML có id="confirmResetBtn"
+const confirmResetBtn = document.getElementById('confirmResetBtn');
+if (confirmResetBtn) {
+    confirmResetBtn.addEventListener('click', () => {
+        if (pendingResetUsername) {
+            executeResetPassword(pendingResetUsername);
+        }
+    });
+}
