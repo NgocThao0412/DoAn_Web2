@@ -69,10 +69,24 @@ if (!empty($_GET['category'])) {
     $category = trim($_GET['searchCategory']);
 }
 
+// Hardcode mapping từ form values sang category_id
+$categoryMap = [
+    'macaron' => 1,
+    'croissant' => 2,
+    'drink' => 3,
+];
+
 if (is_numeric($category) && isset($categoryById[(int)$category])) {
     $categoryId = (int)$category;
     $categorySlug = slugifyCategory($categoryById[$categoryId]);
     $category = $categorySlug;
+} elseif (isset($categoryMap[strtolower(trim($category))])) {
+    // Sử dụng hardcode mapping nếu có
+    $categoryId = $categoryMap[strtolower(trim($category))];
+    if (isset($categoryById[$categoryId])) {
+        $categorySlug = slugifyCategory($categoryById[$categoryId]);
+        $category = $categorySlug;
+    }
 } else {
     $categoryKey = strtolower(trim($category));
     if (isset($categorySlugToId[$categoryKey])) {
