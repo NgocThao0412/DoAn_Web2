@@ -784,3 +784,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+// Validation cho thanh tìm kiếm nâng cao
+document.addEventListener("DOMContentLoaded", function () {
+    const advancedSearchForm = document.querySelector(".advanced-search-form");
+    if (!advancedSearchForm) return;
+
+    advancedSearchForm.addEventListener("submit", function(e) {
+        const minPriceInput = this.querySelector('input[name="minPrice"]');
+        const maxPriceInput = this.querySelector('input[name="maxPrice"]');
+
+        let minPrice = minPriceInput.value.trim() ? parseFloat(minPriceInput.value) : 0;
+        let maxPrice = maxPriceInput.value.trim() ? parseFloat(maxPriceInput.value) : 0;
+
+        // Nếu cả minPrice và maxPrice đều có giá trị
+        if (minPrice > 0 && maxPrice > 0 && minPrice > maxPrice) {
+            e.preventDefault();
+            alert("Giá từ phải nhỏ hơn hoặc bằng giá đến!");
+            maxPriceInput.focus();
+        }
+    });
+});
