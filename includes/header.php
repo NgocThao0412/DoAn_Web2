@@ -61,17 +61,6 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
                 </span>
             </div>
 
-            <div class="advanced-search-fields" id="advanced-search-fields">
-                <select name="category" class="search-criteria">
-                    <option value="all"<?= $searchCategory === 'all' ? ' selected' : '' ?>>Tất cả danh mục</option>
-                    <option value="macaron"<?= $searchCategory === 'macaron' ? ' selected' : '' ?>>Macaron</option>
-                    <option value="croissant"<?= $searchCategory === 'croissant' ? ' selected' : '' ?>>Croissant</option>
-                    <option value="Drink"<?= $searchCategory === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
-                </select>
-                <input type="number" min="0" name="minPrice" class="search-criteria" value="<?= $minPrice ?>" placeholder="Giá từ">
-                <input type="number" min="0" name="maxPrice" class="search-criteria" value="<?= $maxPrice ?>" placeholder="Giá đến">
-            </div>
-
             <div class="hint-container"></div>
         </form>
 
@@ -84,20 +73,12 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var advButton = document.getElementById('toggle-advance-search');
-            var advFields = document.getElementById('advanced-search-fields');
+            var advForm = document.querySelector('.advanced-search-form');
             var searchInput = document.getElementById('header-search-input');
-            var searchForm = document.querySelector('.search-container');
             
-            // Restore search value from URL parameter hoặc sessionStorage
-            var urlParams = new URLSearchParams(window.location.search);
-            if (advButton && advFields) {
+            if (advButton && advForm) {
                 advButton.addEventListener('click', function () {
-                    advFields.classList.toggle('active');
-                    if (advFields.classList.contains('active')) {
-                        advButton.textContent = 'TÌM KIẾM NÂNG CAO';
-                    } else {
-                        advButton.textContent = 'TÌM KIẾM NÂNG CAO';
-                    }
+                    advForm.classList.toggle('active');
                 });
             }
         });
@@ -109,6 +90,21 @@ if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
         <div class="bar"></div>
     </div>
 </div>
+
+<form method="GET" action="index.php" class="advanced-search-form">
+    <div class="advanced-search-fields" id="advanced-search-fields">
+        <select name="category" class="search-criteria">
+            <option value="all"<?= $searchCategory === 'all' ? ' selected' : '' ?>>Tất cả danh mục</option>
+            <option value="macaron"<?= $searchCategory === 'macaron' ? ' selected' : '' ?>>Macaron</option>
+            <option value="croissant"<?= $searchCategory === 'croissant' ? ' selected' : '' ?>>Bánh Sừng Bò</option>
+            <option value="drink"<?= $searchCategory === 'drink' ? ' selected' : '' ?>>Đồ uống</option>
+        </select>
+        <input type="text" name="searchName" class="search-criteria" value="<?= $searchName ?>" placeholder="Tên sản phẩm">
+        <input type="number" min="0" name="minPrice" class="search-criteria" value="<?= $minPrice ?>" placeholder="Giá từ">
+        <input type="number" min="0" name="maxPrice" class="search-criteria" value="<?= $maxPrice ?>" placeholder="Giá đến">
+        <button type="submit" class="search-submit-btn">Tìm kiếm</button>
+    </div>
+</form>
 
 <div class="mobile-menu" id="mobileMenu">
     <div class="hamburger" id="hamburger" onclick="toggleMenu()">
