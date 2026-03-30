@@ -138,8 +138,10 @@
 }
 
 .poster-img:hover{
-    transform: scale(1.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
+
 
 .title {
     font-size: 14px;
