@@ -1,0 +1,101 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+include __DIR__ . "/../app/config/data_connect.php";
+
+$loggedIn = isset($_SESSION['user']) && isset($_SESSION['user']['username']);
+
+if ($loggedIn) {
+    $username = $_SESSION['user']['username'];
+
+  $sql = "SELECT 
+            o.order_id, 
+            DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i') AS order_date,
+            o.total_amount, 
+            o.order_status, 
+            (SELECT SUM(od.quantity) 
+             FROM order_detail od 
+             WHERE od.order_id = o.order_id) AS quantity 
+        FROM orders o 
+        WHERE o.username = ? 
+        ORDER BY o.created_at DESC";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $username); 
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
+$status_list = [
+    'PENDING' => 'Chờ xử lý', 
+    'PROCESSING' => 'Đang xử lý', 
+    'COMPLETED' => 'Hoàn thành',
+    'CANCELLED' => 'Đã hủy'
+];
+?>
+
+<div class="receipt">
+    <div class="big-text">
+        <h1>Hóa đơn của bạn</h1>
+    </div>
+
+    <div class="text-infor">
+        <div class="text-top"><p>Mã#</p></div>
+        <div class="text-top"><p>Ngày</p></div>
+        <div class="text-top"><p>Số lượng</p></div>
+        <div class="text-top"><p>Tổng cộng</p></div>
+        <div class="text-top"><p>Trạng thái</p></div>
+        <div class="text-top"><p>Hành động</p></div>
+    </div>
+
+    <?php if ($loggedIn): ?>
+        <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <div class="custumer">
+                    <div class="text"><p><?= htmlspecialchars($row['order_id']) ?></p></div>
+                    <div class="text"><p><?= htmlspecialchars($row['order_date']) ?></p></div>
+                    <div class="text"><p><?= htmlspecialchars($row['quantity']) ?></p></div>
+                    <div class="text"><p><?= number_format($row['total_amount'], 0, ',', '.') ?> VNĐ</p></div>
+                    <div class="text">
+           <?php 
+               $os = $row['order_status'];
+               $amount = $row['total_amount'];
+
+               if ($os == 'COMPLETED' && $amount == 0) {
+                  echo '<p style="color:#d32f2f; font-weight:bold;">Đã hủy</p>';
+               } else {
+                  switch ($os) {
+                       case 'PENDING':
+                       echo '<p style="color:orange;">Chờ xử lý</p>';
+                       break;
+                       case 'PROCESSING':
+                       echo '<p style="color:blue;">Đang xử lý</p>';
+                       break;
+                       case 'COMPLETED':
+                       echo '<p style="color:green;">Hoàn thành</p>';
+                       break;
+                       default:
+                        echo '<p>'.$os.'</p>';
+                    }
+               }
+                ?>
+            </div>
+                   <div class="text">
+    <button class="choose" data-order-id="<?= $row['order_id'] ?>">
+        Xem thêm
+    </button>
+</div>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <p>Không có đơn hàng.</p>
+        <?php endif; ?>
+    <?php else: ?>
+        <p style="text-align: center; color: red;  margin-bottom: 20px; margin-top: 30px;">
+            Bạn chưa đăng nhập. Vui lòng đăng nhập để xem hóa đơn.
+        </p>
+    <?php endif; ?>
+</div>
+
+<div class="more-infor-content"></div>
+<div class="blur-overlay"></div>

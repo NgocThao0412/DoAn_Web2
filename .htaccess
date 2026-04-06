@@ -1,0 +1,17 @@
+RewriteEngine On
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^login$ index.php?page=login [L,QSA]
+RewriteRule ^register$ index.php?page=register [L,QSA]
+
+RewriteRule ^$ index.php?page=home [L,QSA]
+
+RewriteRule ^app/admin/?$ app/admin/index.php [L]
+RewriteRule ^app/admin/login$ app/admin/index.php [L]
+RewriteRule ^app/admin/([a-zA-Z0-9_-]+)$ app/admin/pages/$1.php [L]
+
+RewriteRule ^(home|about|receipt|advance|croissant|Macaron|Drink|product|pay|order|import-list|import-add|add-category|profile)$ index.php?page=$1 [L,QSA]

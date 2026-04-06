@@ -1,0 +1,175 @@
+/* Tùy chỉnh bảng đơn hàng */
+.order-table-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-top: 20px;
+}
+
+.Home {
+    padding: 20px; 
+}
+
+.order-grid-header {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.5fr 1.2fr 1.5fr 1fr;
+    background: #EF99B4;
+    color: #455265;
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.order-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.5fr 1.2fr 1.5fr 1fr;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.order-row:hover {
+    background: #f9f9ff;
+}
+
+/* Badge trạng thái */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #cce5ff; color: #004085; }
+.status-delivered { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+/* Select tùy chỉnh */
+.order-status-select {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    outline: none;
+    cursor: pointer;
+}
+
+.order-row {
+    border-left: 5px solid #EF99B4; 
+    margin-bottom: 5px;
+}
+
+.view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0f0ff;
+    color: #4e499e;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: 0.3s;
+}
+
+.view-btn:hover {
+    background: #4e499e;
+    color: white;
+}
+
+@media (max-width: 480px) {
+    
+    .text-big {
+        font-size: 20px !important;
+        height: auto !important;
+        margin: 15px !important;
+        padding-bottom: 10px;
+    }
+
+    
+    .filter-box {
+        flex-direction: column !important; 
+        padding: 10px !important;
+        gap: 10px !important;
+    }
+
+    .filter-box > div {
+        width: 100% !important; 
+    }
+
+    #btn-filter {
+        width: 100% !important;
+        margin-top: 5px;
+    }
+
+    
+    .order-grid-header {
+        display: none !important; 
+    }
+
+    .order-table-container {
+        padding: 10px !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .order-row {
+        display: flex !important;
+        flex-direction: column !important; 
+        background: #fff;
+        border-radius: 12px;
+        margin-bottom: 15px !important;
+        padding: 15px !important;
+        border: 1px solid #eee !important;
+        border-left: 6px solid #EF99B4 !important; 
+        gap: 8px !important;
+        text-align: left !important;
+    }
+
+    .order-row > div {
+        width: 100% !important;
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+        border-bottom: 1px dashed #f0f0f0;
+        padding-bottom: 5px;
+    }
+
+    /* Thêm tiêu đề giả bằng CSS để Admin biết số đó là gì */
+    .order-row > div:nth-child(1):before { content: "Mã đơn:"; font-weight: bold; color: #455265; }
+    .order-row > div:nth-child(2):before { content: "Ngày đặt:"; font-weight: bold; color: #455265; }
+    .order-row > div:nth-child(3):before { content: "Khu vực:"; font-weight: bold; color: #455265; }
+    .order-row > div:nth-child(4):before { content: "Tổng tiền:"; font-weight: bold; color: #455265; }
+    .order-row > div:nth-child(5):before { content: "Trạng thái:"; font-weight: bold; color: #455265; }
+
+    
+    .order-status-select {
+        margin: 0 !important;
+        width: 140px !important;
+        height: 35px !important;
+        font-size: 13px;
+    }
+
+    .order-row > div:last-child {
+        border-bottom: none;
+        padding-top: 5px;
+        justify-content: center !important; 
+    }
+
+    .view-btn {
+        width: 100% !important; 
+        justify-content: center;
+        height: 40px;
+        background: #4e499e !important;
+        color: white !important;
+        border-radius: 8px;
+    }
+
+    .Home {
+        padding: 5px !important;
+    }
+}
